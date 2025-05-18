@@ -4,7 +4,12 @@ import Link from 'next/link';
 import Logo from '@/public/logo_nobg.png';
 import Image from 'next/image';
 import DashboardLinks from '../components/DashboardLinks';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import {
+	Sheet,
+	SheetContent,
+	SheetTitle,
+	SheetTrigger,
+} from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { Menu, User2 } from 'lucide-react';
 import {
@@ -64,6 +69,7 @@ export default async function DashboardLayout({
 							</SheetTrigger>
 
 							<SheetContent side="left">
+								<SheetTitle>Navigation</SheetTitle>
 								<nav className="grid gap-2 mt-10">
 									<DashboardLinks />
 								</nav>
@@ -116,6 +122,10 @@ export default async function DashboardLayout({
 							</DropdownMenu>
 						</div>
 					</header>
+
+					<main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
+						{children}
+					</main>
 				</div>
 			</div>
 		</>
