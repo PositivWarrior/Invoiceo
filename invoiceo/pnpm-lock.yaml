@@ -11,6 +11,12 @@ importers:
       '@auth/prisma-adapter':
         specifier: ^2.9.1
         version: 2.9.1(@prisma/client@6.8.2(prisma@6.8.2(typescript@5.8.3))(typescript@5.8.3))(nodemailer@7.0.3)
+      '@conform-to/react':
+        specifier: ^1.5.1
+        version: 1.5.1(react@19.1.0)
+      '@conform-to/zod':
+        specifier: ^1.5.1
+        version: 1.5.1(zod@3.24.4)
       '@prisma/client':
         specifier: ^6.8.2
         version: 6.8.2(prisma@6.8.2(typescript@5.8.3))(typescript@5.8.3)
@@ -53,6 +59,9 @@ importers:
       tailwind-merge:
         specifier: ^3.3.0
         version: 3.3.0
+      zod:
+        specifier: ^3.24.4
+        version: 3.24.4
     devDependencies:
       '@eslint/eslintrc':
         specifier: ^3
@@ -116,6 +125,19 @@ packages:
     resolution: {integrity: sha512-0ZfjOPt3Ci8yx8SMCydAuBAjR/exI/8SAr6JDVYtqDFhm0JaV1XuHYgEzgzXZZfW2+WKC29LowCWxdCjoAz9kQ==}
     peerDependencies:
       '@prisma/client': '>=2.26.0 || >=3 || >=4 || >=5 || >=6'
+
+  '@conform-to/dom@1.5.1':
+    resolution: {integrity: sha512-QZeNJ+TC6NjBb8zHYHcXVxuFHxWLo8zYhJyHvKymkIqKwoDCnu6X8EheAbnKHh79PpgBttIu6gdjibEwUsBGuw==}
+
+  '@conform-to/react@1.5.1':
+    resolution: {integrity: sha512-dEKH81vm1+BphgFP9v7OkHxu4CDVq70yk4tApIFV2gqQAA0P7ZMrD4cu2e2o2TAYDiThPEuKxkcCmuAwbZTZbw==}
+    peerDependencies:
+      react: '>=18'
+
+  '@conform-to/zod@1.5.1':
+    resolution: {integrity: sha512-X89Asni+LlM5U7abJcD3OE/HLKB0SGqo9KVLGZsn/QUVXT+cJDVAXFz1TP6/zDEdsOkabDw+xBHQF2vPxkfrOg==}
+    peerDependencies:
+      zod: ^3.21.0
 
   '@emnapi/core@1.4.3':
     resolution: {integrity: sha512-4m62DuCE07lw01soJwPiBGC0nAww0Q+RY70VZ+n49yDIO13yyinhbWCeNnaob0lakDtWQzSdtNWzJeOJt2ma+g==}
@@ -2531,6 +2553,18 @@ snapshots:
       - '@simplewebauthn/browser'
       - '@simplewebauthn/server'
       - nodemailer
+
+  '@conform-to/dom@1.5.1': {}
+
+  '@conform-to/react@1.5.1(react@19.1.0)':
+    dependencies:
+      '@conform-to/dom': 1.5.1
+      react: 19.1.0
+
+  '@conform-to/zod@1.5.1(zod@3.24.4)':
+    dependencies:
+      '@conform-to/dom': 1.5.1
+      zod: 3.24.4
 
   '@emnapi/core@1.4.3':
     dependencies:

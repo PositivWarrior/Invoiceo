@@ -69,7 +69,9 @@ export default async function DashboardLayout({
 							</SheetTrigger>
 
 							<SheetContent side="left">
-								<SheetTitle>Navigation</SheetTitle>
+								<SheetTitle className="hidden">
+									Navigation
+								</SheetTitle>
 								<nav className="grid gap-2 mt-10">
 									<DashboardLinks />
 								</nav>
