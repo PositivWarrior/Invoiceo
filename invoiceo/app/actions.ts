@@ -61,6 +61,9 @@ export async function createInvoice(previousState: any, formData: FormData) {
 			note: submission.value.note,
 			status: submission.value.status,
 			total: submission.value.total,
+			userId: session.user?.id,
 		},
 	});
+
+	return redirect('/dashboard/invoices');
 }
