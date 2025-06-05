@@ -23,6 +23,7 @@
 		"clsx": "^2.1.1",
 		"date-fns": "^4.1.0",
 		"lucide-react": "^0.510.0",
+		"mailtrap": "^4.1.0",
 		"next": "15.3.2",
 		"next-auth": "5.0.0-beta.28",
 		"nodemailer": "^7.0.3",

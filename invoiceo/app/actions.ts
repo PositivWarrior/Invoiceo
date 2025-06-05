@@ -5,6 +5,8 @@ import { parseWithZod } from '@conform-to/zod';
 import { invoiceSchema, onboardingSchema } from './utils/zodSchemas';
 import prisma from './utils/db';
 import { redirect } from 'next/navigation';
+import { emailClient } from './utils/mailtrap';
+import { formatCurrency } from './utils/formatCurrency';
 
 export async function onboardUser(previousState: any, formData: FormData) {
 	const session = await requireUser();
@@ -62,6 +64,29 @@ export async function createInvoice(previousState: any, formData: FormData) {
 			status: submission.value.status,
 			total: submission.value.total,
 			userId: session.user?.id,
+		},
+	});
+
+	const sender = {
+		email: 'contact@kacpermargol.eu',
+		name: 'Kacper Margol',
+	};
+
+	emailClient.send({
+		from: sender,
+		to: [{ email: submission.value.clientEmail }],
+		template_uuid: '8d4037e8-70a2-49e7-bc31-6426b29d9384',
+		template_variables: {
+			clientName: submission.value.clientName,
+			invoiceNumber: submission.value.invoiceNumber,
+			dueDate: new Intl.DateTimeFormat('en-GB', {
+				dateStyle: 'long',
+			}).format(new Date(submission.value.date)),
+			totalAmount: formatCurrency({
+				amount: submission.value.total,
+				currency: submission.value.currency as any,
+			}),
+			invoiceLink: 'Test_Invoicelink',
 		},
 	});
 
