@@ -86,7 +86,7 @@ export async function createInvoice(previousState: any, formData: FormData) {
 				amount: submission.value.total,
 				currency: submission.value.currency as any,
 			}),
-			invoiceLink: 'Test_Invoicelink',
+			invoiceLink: `${process.env.NEXT_PUBLIC_APP_URL}api/invoice/${data.id}`,
 		},
 	});
 
