@@ -1,9 +1,16 @@
 'use client';
 
-import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Calendar } from '@/components/ui/calendar';
+import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+	Popover,
+	PopoverContent,
+	PopoverTrigger,
+} from '@/components/ui/popover';
 import {
 	Select,
 	SelectContent,
@@ -11,37 +18,23 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from '@/components/ui/select';
-import { Calendar } from '@/components/ui/calendar';
-import {
-	Popover,
-	PopoverContent,
-	PopoverTrigger,
-} from '@/components/ui/popover';
-import { Button } from '@/components/ui/button';
-import { CalendarIcon } from 'lucide-react';
-import { useActionState, useState } from 'react';
 import { Textarea } from '@/components/ui/textarea';
+import { CalendarIcon } from 'lucide-react';
 import { SubmitButton } from './SubmitButtons';
-import { createInvoice } from '../actions';
+import { useActionState, useState } from 'react';
 import { useForm } from '@conform-to/react';
 import { parseWithZod } from '@conform-to/zod';
 import { invoiceSchema } from '../utils/zodSchemas';
+import { createInvoice, editInvoice } from '../actions';
 import { formatCurrency } from '../utils/formatCurrency';
+import { Prisma } from '@prisma/client';
 
-interface CreateInvoiceProps {
-	firstName: string;
-	lastName: string;
-	address: string;
-	email: string;
+interface EditInvoiceProps {
+	data: Prisma.InvoiceGetPayload<{}>;
 }
 
-export function CreateInvoice({
-	firstName,
-	lastName,
-	address,
-	email,
-}: CreateInvoiceProps) {
-	const [lastResult, action] = useActionState(createInvoice, undefined);
+export function EditInvoice({ data }: EditInvoiceProps) {
+	const [lastResult, action] = useActionState(editInvoice, undefined);
 	const [form, fields] = useForm({
 		lastResult,
 		onValidate({ formData }) {
@@ -53,10 +46,12 @@ export function CreateInvoice({
 		shouldRevalidate: 'onInput',
 	});
 
-	const [selectedDate, setSelectedDate] = useState(new Date());
-	const [rate, setRate] = useState('');
-	const [quantity, setQuantity] = useState('');
-	const [currency, setCurrency] = useState('NOK');
+	const [selectedDate, setSelectedDate] = useState(data.date);
+	const [rate, setRate] = useState(data.invoiceItemRate.toString());
+	const [quantity, setQuantity] = useState(
+		data.invoiceItemQuantity.toString(),
+	);
+	const [currency, setCurrency] = useState(data.currency);
 
 	const calculateTotal = (Number(quantity) || 0) * (Number(rate) || 0);
 
@@ -69,6 +64,8 @@ export function CreateInvoice({
 					onSubmit={form.onSubmit}
 					noValidate
 				>
+					<input type="hidden" name="id" value={data.id} />
+
 					<input
 						type="hidden"
 						name={fields.date.name}
@@ -88,7 +85,7 @@ export function CreateInvoice({
 								placeholder="Invoice Name"
 								name={fields.invoiceName.name}
 								key={fields.invoiceName.key}
-								defaultValue={fields.invoiceName.value}
+								defaultValue={data.invoiceName}
 							/>
 						</div>
 						<p className="text-red-500 text-sm">
@@ -108,7 +105,7 @@ export function CreateInvoice({
 									placeholder="5"
 									name={fields.invoiceNumber.name}
 									key={fields.invoiceNumber.key}
-									defaultValue={fields.invoiceNumber.value}
+									defaultValue={data.invoiceNumber}
 								/>
 							</div>
 							<p className="text-red-500 text-sm">
@@ -147,7 +144,7 @@ export function CreateInvoice({
 									placeholder="Your Name"
 									name={fields.fromName.name}
 									key={fields.fromName.key}
-									defaultValue={`${firstName} ${lastName}`}
+									defaultValue={data.fromName}
 								/>
 								<p className="text-red-500 text-sm">
 									{fields.fromName.errors}
@@ -156,7 +153,7 @@ export function CreateInvoice({
 									placeholder="Your Email"
 									name={fields.fromEmail.name}
 									key={fields.fromEmail.key}
-									defaultValue={email}
+									defaultValue={data.fromEmail}
 								/>
 								<p className="text-red-500 text-sm">
 									{fields.fromEmail.errors}
@@ -165,7 +162,7 @@ export function CreateInvoice({
 									placeholder="Your Address"
 									name={fields.fromAddress.name}
 									key={fields.fromAddress.key}
-									defaultValue={address}
+									defaultValue={data.fromAddress}
 								/>
 								<p className="text-red-500 text-sm">
 									{fields.fromAddress.errors}
@@ -180,9 +177,7 @@ export function CreateInvoice({
 									placeholder="Client Name"
 									name={fields.clientName.name}
 									key={fields.clientName.key}
-									defaultValue={
-										fields.clientName.initialValue
-									}
+									defaultValue={data.clientName}
 								/>
 								<p className="text-red-500 text-sm">
 									{fields.clientName.errors}
@@ -191,9 +186,7 @@ export function CreateInvoice({
 									placeholder="Client Email"
 									name={fields.clientEmail.name}
 									key={fields.clientEmail.key}
-									defaultValue={
-										fields.clientEmail.initialValue
-									}
+									defaultValue={data.clientEmail}
 								/>
 								<p className="text-red-500 text-sm">
 									{fields.clientEmail.errors}
@@ -202,9 +195,7 @@ export function CreateInvoice({
 									placeholder="Client Address"
 									name={fields.clientAddress.name}
 									key={fields.clientAddress.key}
-									defaultValue={
-										fields.clientAddress.initialValue
-									}
+									defaultValue={data.clientAddress}
 								/>
 								<p className="text-red-500 text-sm">
 									{fields.clientAddress.errors}
@@ -255,7 +246,7 @@ export function CreateInvoice({
 							<Select
 								name={fields.dueDate.name}
 								key={fields.dueDate.key}
-								defaultValue={fields.dueDate.initialValue}
+								defaultValue={data.dueDate.toString()}
 							>
 								<SelectTrigger className="w-full">
 									<SelectValue placeholder="Select a due date" />
@@ -291,10 +282,7 @@ export function CreateInvoice({
 									placeholder="Item name & description"
 									name={fields.invoiceItemDescription.name}
 									key={fields.invoiceItemDescription.key}
-									defaultValue={
-										fields.invoiceItemDescription
-											.initialValue
-									}
+									defaultValue={data.invoiceItemDescription}
 								/>
 								<p className="text-red-500 text-sm">
 									{fields.invoiceItemDescription.errors}
@@ -369,7 +357,7 @@ export function CreateInvoice({
 							placeholder="Add your note's right here..."
 							name={fields.note.name}
 							key={fields.note.key}
-							defaultValue={fields.note.initialValue}
+							defaultValue={data.note ?? undefined}
 						/>
 						<p className="text-red-500 text-sm">
 							{fields.note.errors}
@@ -378,7 +366,7 @@ export function CreateInvoice({
 
 					<div className="flex items-center justify-end mt-6">
 						<div>
-							<SubmitButton text="Send Invoice to Client" />
+							<SubmitButton text="Update Invoice" />
 						</div>
 					</div>
 				</form>
