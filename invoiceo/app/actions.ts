@@ -130,5 +130,28 @@ export async function editInvoice(previousState: any, formData: FormData) {
 		},
 	});
 
+	const sender = {
+		email: 'contact@kacpermargol.eu',
+		name: 'Kacper Margol',
+	};
+
+	emailClient.send({
+		from: sender,
+		to: [{ email: submission.value.clientEmail }],
+		template_uuid: '69955f27-be86-45f4-b001-72d279169ff6',
+		template_variables: {
+			clientName: submission.value.clientName,
+			invoiceNumber: submission.value.invoiceNumber,
+			dueDate: new Intl.DateTimeFormat('en-GB', {
+				dateStyle: 'long',
+			}).format(new Date(submission.value.date)),
+			totalAmount: formatCurrency({
+				amount: submission.value.total,
+				currency: submission.value.currency as any,
+			}),
+			invoiceLink: `${process.env.NEXT_PUBLIC_APP_URL}api/invoice/${data.id}`,
+		},
+	});
+
 	return redirect(`/dashboard/invoices`);
 }
