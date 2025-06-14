@@ -64,7 +64,7 @@ export function InvoiceActions({ id }: InvoiceActionsProps) {
 					Send Reminder
 				</DropdownMenuItem>
 				<DropdownMenuItem asChild>
-					<Link href="">
+					<Link href={`/dashboard/invoices/${id}/delete`}>
 						<Trash className="size-4 mr-2" />
 						Delete Invoice
 					</Link>
