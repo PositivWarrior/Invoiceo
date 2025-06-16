@@ -1,0 +1,1 @@
+const nodemailer = require('nodemailer'); const transporter = nodemailer.createTransporter({ host: 'live.smtp.mailtrap.io', port: 587, secure: false, auth: { user: 'apismtp@mailtrap.io', pass: '336cd26d7dc243ed1388f6b1ba519c9b' } }); transporter.verify((error, success) => { if (error) { console.log('SMTP Error:', error); } else { console.log('SMTP connection successful'); } });

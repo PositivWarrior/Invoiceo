@@ -26,7 +26,12 @@ export default async function DashboardRoute() {
 	return (
 		<>
 			{data.length < 1 ? (
-				<EmptyState />
+				<EmptyState
+					title="No invoice found"
+					description="Hey, you haven't created any invoices yet. Click the button below to get started."
+					buttonText="Create Invoice"
+					href="/dashboard/invoices/create"
+				/>
 			) : (
 				<>
 					<DashboardBlocks />
