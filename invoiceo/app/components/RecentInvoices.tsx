@@ -2,6 +2,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import prisma from '../utils/db';
 import { requireUser } from '../utils/hooks';
+import { formatCurrency } from '../utils/formatCurrency';
 
 async function getData(userId: string) {
 	const data = await prisma.invoice.findMany({
@@ -13,6 +14,7 @@ async function getData(userId: string) {
 			clientName: true,
 			clientEmail: true,
 			total: true,
+			currency: true,
 		},
 		orderBy: {
 			createdAt: 'desc',
@@ -33,24 +35,29 @@ export async function RecentInvoices() {
 				<CardTitle>Recent Invoices</CardTitle>
 			</CardHeader>
 
-			<CardContent>
+			<CardContent className="flex flex-col gap-4">
 				{data.map((item) => (
-					<div className="flex items-center gap-4">
+					<div className="flex items-center gap-4" key={item.id}>
 						<Avatar className="hidden sm:flex size-9">
-							<AvatarFallback>KM</AvatarFallback>
+							<AvatarFallback>
+								{item.clientName.slice(0, 2)}
+							</AvatarFallback>
 						</Avatar>
 
 						<div className="flex flex-col gap-1">
 							<p className="text-sm font-medium leading-none">
-								Robert Gomola
+								{item.clientName}
 							</p>
 							<p className="text-sm text-muted-foreground">
-								robert@gomola.com
+								{item.clientEmail}
 							</p>
 						</div>
 
 						<div className="text-sm font-medium text-muted-foreground ml-auto">
-							+$ 500,00
+							{formatCurrency({
+								amount: item.total,
+								currency: item.currency as any,
+							})}
 						</div>
 					</div>
 				))}
