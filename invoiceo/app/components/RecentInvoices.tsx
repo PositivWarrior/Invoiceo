@@ -56,7 +56,10 @@ export async function RecentInvoices() {
 						<div className="text-sm font-medium text-muted-foreground ml-auto">
 							{formatCurrency({
 								amount: item.total,
-								currency: item.currency as any,
+								currency: item.currency as
+									| 'NOK'
+									| 'USD'
+									| 'EUR',
 							})}
 						</div>
 					</div>
