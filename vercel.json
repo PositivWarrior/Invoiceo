@@ -1,6 +1,0 @@
-{
-	"buildCommand": "cd invoiceo && npm run build",
-	"outputDirectory": "invoiceo/.next",
-	"installCommand": "cd invoiceo && npm install",
-	"rootDirectory": "invoiceo"
-}
