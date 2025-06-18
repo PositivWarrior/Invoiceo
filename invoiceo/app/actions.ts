@@ -149,7 +149,10 @@ export async function editInvoice(previousState: any, formData: FormData) {
 				amount: submission.value.total,
 				currency: submission.value.currency as any,
 			}),
-			invoiceLink: `${process.env.NEXT_PUBLIC_APP_URL}api/invoice/${data.id}`,
+			invoiceLink:
+				process.env.NODE_ENV !== 'production'
+					? `${process.env.NEXT_PUBLIC_APP_URL}api/invoice/${data.id}`
+					: `$https://invoiceo.vercel.app/api/invoice/${data.id}`,
 		},
 	});
 
