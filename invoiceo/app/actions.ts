@@ -155,7 +155,7 @@ export async function editInvoice(previousState: unknown, formData: FormData) {
 			invoiceLink:
 				process.env.NODE_ENV !== 'production'
 					? `${process.env.NEXT_PUBLIC_APP_URL}api/invoice/${data.id}`
-					: `$https://invoiceo.vercel.app/api/invoice/${data.id}`,
+					: `https://invoiceo-xi.vercel.app/api/invoice/${data.id}`,
 		},
 	});
 
