@@ -333,7 +333,10 @@ export function CreateInvoice({
 									disabled
 									value={formatCurrency({
 										amount: calculateTotal,
-										currency: currency as any,
+										currency: currency as
+											| 'NOK'
+											| 'USD'
+											| 'EUR',
 									})}
 								/>
 							</div>
@@ -347,7 +350,10 @@ export function CreateInvoice({
 								<span>
 									{formatCurrency({
 										amount: calculateTotal,
-										currency: currency as any,
+										currency: currency as
+											| 'NOK'
+											| 'USD'
+											| 'EUR',
 									})}
 								</span>
 							</div>
@@ -356,7 +362,10 @@ export function CreateInvoice({
 								<span className="font-medium underline underline-offset-2">
 									{formatCurrency({
 										amount: calculateTotal,
-										currency: currency as any,
+										currency: currency as
+											| 'NOK'
+											| 'USD'
+											| 'EUR',
 									})}
 								</span>
 							</div>

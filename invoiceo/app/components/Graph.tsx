@@ -5,7 +5,7 @@ import {
 	ChartTooltip,
 	ChartTooltipContent,
 } from '@/components/ui/chart';
-import { Line, LineChart, ResponsiveContainer, XAxis, YAxis } from 'recharts';
+import { Line, LineChart, XAxis, YAxis } from 'recharts';
 
 interface GraphProps {
 	data: {

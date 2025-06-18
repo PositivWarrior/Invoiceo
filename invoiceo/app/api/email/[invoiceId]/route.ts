@@ -51,7 +51,7 @@ export async function POST(
 		});
 
 		return NextResponse.json({ success: true });
-	} catch (error) {
+	} catch {
 		return NextResponse.json(
 			{ error: 'Failed to send email reminder' },
 			{ status: 500 },

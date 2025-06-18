@@ -25,12 +25,12 @@ import { useActionState, useState } from 'react';
 import { useForm } from '@conform-to/react';
 import { parseWithZod } from '@conform-to/zod';
 import { invoiceSchema } from '../utils/zodSchemas';
-import { createInvoice, editInvoice } from '../actions';
+import { editInvoice } from '../actions';
 import { formatCurrency } from '../utils/formatCurrency';
 import { Prisma } from '@prisma/client';
 
 interface EditInvoiceProps {
-	data: Prisma.InvoiceGetPayload<{}>;
+	data: Prisma.InvoiceGetPayload<Record<string, never>>;
 }
 
 export function EditInvoice({ data }: EditInvoiceProps) {
@@ -321,7 +321,10 @@ export function EditInvoice({ data }: EditInvoiceProps) {
 									disabled
 									value={formatCurrency({
 										amount: calculateTotal,
-										currency: currency as any,
+										currency: currency as
+											| 'NOK'
+											| 'USD'
+											| 'EUR',
 									})}
 								/>
 							</div>
@@ -335,7 +338,10 @@ export function EditInvoice({ data }: EditInvoiceProps) {
 								<span>
 									{formatCurrency({
 										amount: calculateTotal,
-										currency: currency as any,
+										currency: currency as
+											| 'NOK'
+											| 'USD'
+											| 'EUR',
 									})}
 								</span>
 							</div>
@@ -344,7 +350,10 @@ export function EditInvoice({ data }: EditInvoiceProps) {
 								<span className="font-medium underline underline-offset-2">
 									{formatCurrency({
 										amount: calculateTotal,
-										currency: currency as any,
+										currency: currency as
+											| 'NOK'
+											| 'USD'
+											| 'EUR',
 									})}
 								</span>
 							</div>
