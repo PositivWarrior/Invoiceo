@@ -2,6 +2,7 @@ import prisma from '@/app/utils/db';
 import { NextResponse } from 'next/server';
 import { jsPDF } from 'jspdf';
 import { formatCurrency } from '@/app/utils/formatCurrency';
+import { requireUser } from '@/app/utils/hooks';
 
 export async function GET(
 	request: Request,
@@ -11,11 +12,15 @@ export async function GET(
 		params: Promise<{ invoiceId: string }>;
 	},
 ) {
+	// Get the current user session
+	const session = await requireUser();
 	const { invoiceId } = await params;
 
+	// Fetch the invoice data and verify it belongs to the current user
 	const data = await prisma.invoice.findUnique({
 		where: {
 			id: invoiceId,
+			userId: session.user?.id, // Ensure user can only access their own invoices
 		},
 		select: {
 			invoiceName: true,
@@ -37,10 +42,32 @@ export async function GET(
 		},
 	});
 
+	// Fetch the user's data for dynamic footer
+	const userData = await prisma.user.findUnique({
+		where: {
+			id: session.user?.id,
+		},
+		select: {
+			firstName: true,
+			lastName: true,
+			email: true,
+			address: true,
+		},
+	});
+
 	if (!data) {
 		return NextResponse.json(
 			{
 				error: 'Invoice not found',
+			},
+			{ status: 404 },
+		);
+	}
+
+	if (!userData) {
+		return NextResponse.json(
+			{
+				error: 'User data not found',
 			},
 			{ status: 404 },
 		);
@@ -135,16 +162,29 @@ export async function GET(
 		pdf.text(data.note, 20, 160);
 	}
 
-	// Footer
+	// Dynamic Footer based on current user data
 	const pageHeight = pdf.internal.pageSize.getHeight();
 	const footerYPosition = pageHeight - 17; // Approx 17mm from bottom
 	pdf.setFont('helvetica', 'normal');
 	pdf.setFontSize(10);
-	pdf.text(
-		`${data.fromName} | Invoice #${data.invoiceNumber} | Thank you for your business!`,
-		20,
-		footerYPosition,
-	);
+
+	// Create dynamic footer with user's information
+	const userFullName =
+		userData.firstName && userData.lastName
+			? `${userData.firstName} ${userData.lastName}`
+			: userData.firstName || userData.lastName || 'User';
+
+	const footerText = [
+		userFullName,
+		userData.email || 'No email provided',
+		userData.address && userData.address.trim() !== ''
+			? userData.address
+			: 'Address not provided',
+		`Invoice #${data.invoiceNumber}`,
+		'Thank you for your business!',
+	].join(' | ');
+
+	pdf.text(footerText, 20, footerYPosition);
 
 	// Save the PDF
 

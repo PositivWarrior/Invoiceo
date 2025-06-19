@@ -30,10 +30,42 @@ export async function POST(
 			);
 		}
 
+		// Fetch the current user's data for dynamic email footer
+		const userData = await prisma.user.findUnique({
+			where: {
+				id: session.user?.id,
+			},
+			select: {
+				firstName: true,
+				lastName: true,
+				email: true,
+				address: true,
+			},
+		});
+
+		if (!userData) {
+			return NextResponse.json(
+				{ error: 'User data not found' },
+				{ status: 404 },
+			);
+		}
+
+		// Create dynamic sender information based on current user
+		const userFullName =
+			userData.firstName && userData.lastName
+				? `${userData.firstName} ${userData.lastName}`
+				: userData.firstName || userData.lastName || 'User';
+
 		const sender = {
-			email: 'contact@kacpermargol.eu',
-			name: 'Kacper Margol',
+			email: 'contact@kacpermargol.eu', // Keep verified sender email for Mailtrap
+			name: userFullName, // Use dynamic user name
 		};
+
+		// Parse user address for dynamic company info
+		const addressParts = userData.address
+			? userData.address.split(',').map((part) => part.trim())
+			: [];
+		const [street, city, zipCode, country] = addressParts;
 
 		emailClient.send({
 			from: sender,
@@ -42,11 +74,11 @@ export async function POST(
 			template_uuid: '708d9a25-9c60-42c6-9b05-d62eb77dcf36',
 			template_variables: {
 				first_name: invoiceData.clientName,
-				company_info_name: 'MNova',
-				company_info_address: 'Nesveien 58',
-				company_info_city: 'Moss',
-				company_info_zip_code: '1513',
-				company_info_country: 'Norway',
+				company_info_name: userFullName,
+				company_info_address: street || 'Address not provided',
+				company_info_city: city || 'City not provided',
+				company_info_zip_code: zipCode || 'Zip not provided',
+				company_info_country: country || 'Country not provided',
 			},
 		});
 

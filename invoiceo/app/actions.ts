@@ -70,9 +70,27 @@ export async function createInvoice(
 		},
 	});
 
+	// Fetch current user data for dynamic sender information
+	const userData = await prisma.user.findUnique({
+		where: {
+			id: session.user?.id,
+		},
+		select: {
+			firstName: true,
+			lastName: true,
+			email: true,
+		},
+	});
+
+	// Create dynamic sender information
+	const userFullName =
+		userData?.firstName && userData?.lastName
+			? `${userData.firstName} ${userData.lastName}`
+			: userData?.firstName || userData?.lastName || 'User';
+
 	const sender = {
-		email: 'contact@kacpermargol.eu',
-		name: 'Kacper Margol',
+		email: 'contact@kacpermargol.eu', // Keep verified sender email for Mailtrap
+		name: userFullName, // Use dynamic user name
 	};
 
 	emailClient.send({
@@ -133,9 +151,27 @@ export async function editInvoice(previousState: unknown, formData: FormData) {
 		},
 	});
 
+	// Fetch current user data for dynamic sender information
+	const userData = await prisma.user.findUnique({
+		where: {
+			id: session.user?.id,
+		},
+		select: {
+			firstName: true,
+			lastName: true,
+			email: true,
+		},
+	});
+
+	// Create dynamic sender information
+	const userFullName =
+		userData?.firstName && userData?.lastName
+			? `${userData.firstName} ${userData.lastName}`
+			: userData?.firstName || userData?.lastName || 'User';
+
 	const sender = {
-		email: 'contact@kacpermargol.eu',
-		name: 'Kacper Margol',
+		email: 'contact@kacpermargol.eu', // Keep verified sender email for Mailtrap
+		name: userFullName, // Use dynamic user name
 	};
 
 	emailClient.send({
