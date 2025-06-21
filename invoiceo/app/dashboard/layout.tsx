@@ -54,23 +54,23 @@ export default async function DashboardLayout({
 
 	return (
 		<>
-			<div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr]">
-				<div className="hidden border-r bg-muted/40 md:block">
+			<div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr] bg-gradient-to-br from-background via-background to-accent/5">
+				<div className="hidden border-r border-primary/20 bg-gradient-to-b from-primary/5 to-accent/10 backdrop-blur-sm md:block shadow-lg">
 					<div className="flex flex-col max-h-screen h-full gap-2">
-						<div className="h-14 flex items-center border-b px-4 lg:h-[60px] lg:px-6">
-							<Link href="/" className="flex items-center gap-2">
+						<div className="h-14 flex items-center border-b border-primary/20 px-4 lg:h-[60px] lg:px-6 bg-gradient-to-r from-primary/10 to-accent/10">
+							<Link
+								href="/"
+								className="flex items-center gap-2 hover:scale-105 transition-transform duration-200"
+							>
 								<Image
 									src={Logo}
 									alt="Logo"
-									className="size-40"
+									className="size-40 drop-shadow-lg"
 								/>
-								{/* <p className="text-2xl font-bold text-blue-600">
-									Invoiceo
-								</p> */}
 							</Link>
 						</div>
 
-						<div className="flex-1">
+						<div className="flex-1 p-2">
 							<nav className="grid items-start px-2 text-sm font-medium lg:px-4">
 								<DashboardLinks />
 							</nav>
@@ -79,7 +79,7 @@ export default async function DashboardLayout({
 				</div>
 
 				<div className="flex flex-col">
-					<header className="flex h-14 items-center gap-4 border-b bg-muted/40 px-4 lg:h-[60px] lg:px-6">
+					<header className="flex h-14 items-center gap-4 border-b border-primary/20 bg-gradient-to-r from-primary/5 to-accent/10 px-4 lg:h-[60px] lg:px-6 backdrop-blur-sm shadow-sm">
 						<Sheet>
 							<SheetTrigger asChild>
 								<Button
@@ -91,7 +91,10 @@ export default async function DashboardLayout({
 								</Button>
 							</SheetTrigger>
 
-							<SheetContent side="left">
+							<SheetContent
+								side="left"
+								className="bg-gradient-to-b from-primary/5 to-accent/10"
+							>
 								<SheetTitle className="hidden">
 									Navigation
 								</SheetTitle>
@@ -105,32 +108,44 @@ export default async function DashboardLayout({
 							<DropdownMenu>
 								<DropdownMenuTrigger asChild>
 									<Button
-										className="rounded-full"
+										className="rounded-full bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 border-0 shadow-lg"
 										variant="outline"
 										size="icon"
 									>
-										<User2 />
+										<User2 className="text-white" />
 									</Button>
 								</DropdownMenuTrigger>
 
-								<DropdownMenuContent align="end">
-									<DropdownMenuLabel>
+								<DropdownMenuContent
+									align="end"
+									className="bg-gradient-to-b from-card to-accent/5 border border-primary/20"
+								>
+									<DropdownMenuLabel className="text-primary">
 										My Account
 									</DropdownMenuLabel>
-									<DropdownMenuSeparator />
+									<DropdownMenuSeparator className="bg-primary/20" />
 
-									<DropdownMenuItem asChild>
+									<DropdownMenuItem
+										asChild
+										className="hover:bg-gradient-to-r hover:from-primary/10 hover:to-accent/10"
+									>
 										<Link href="/dashboard">Dashboard</Link>
 									</DropdownMenuItem>
 
-									<DropdownMenuItem asChild>
+									<DropdownMenuItem
+										asChild
+										className="hover:bg-gradient-to-r hover:from-primary/10 hover:to-accent/10"
+									>
 										<Link href="/dashboard/invoices">
 											Invoices
 										</Link>
 									</DropdownMenuItem>
-									<DropdownMenuSeparator />
+									<DropdownMenuSeparator className="bg-primary/20" />
 
-									<DropdownMenuItem asChild>
+									<DropdownMenuItem
+										asChild
+										className="hover:bg-gradient-to-r hover:from-destructive/10 hover:to-destructive/5"
+									>
 										<form
 											className="w-full"
 											action={async () => {
@@ -148,7 +163,7 @@ export default async function DashboardLayout({
 						</div>
 					</header>
 
-					<main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6">
+					<main className="flex flex-1 flex-col gap-4 p-4 lg:gap-6 lg:p-6 bg-gradient-to-br from-background to-accent/5">
 						{children}
 					</main>
 				</div>

@@ -109,6 +109,11 @@ model Invoice {
   invoiceItemQuantity    Int
   invoiceItemRate        Int
 
+  // Tax fields for MVA calculation
+  taxRate   Float? @default(0)
+  taxAmount Int?   @default(0)
+  subtotal  Int?   @default(0)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   User      User?    @relation(fields: [userId], references: [id])

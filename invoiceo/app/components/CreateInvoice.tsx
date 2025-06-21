@@ -19,7 +19,7 @@ import {
 } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
 import { CalendarIcon } from 'lucide-react';
-import { useActionState, useState } from 'react';
+import { useActionState, useState, useEffect } from 'react';
 import { Textarea } from '@/components/ui/textarea';
 import { SubmitButton } from './SubmitButtons';
 import { createInvoice } from '../actions';
@@ -33,6 +33,7 @@ interface CreateInvoiceProps {
 	lastName: string;
 	address: string;
 	email: string;
+	nextInvoiceNumber: number;
 }
 
 export function CreateInvoice({
@@ -40,6 +41,7 @@ export function CreateInvoice({
 	lastName,
 	address,
 	email,
+	nextInvoiceNumber,
 }: CreateInvoiceProps) {
 	const [lastResult, action] = useActionState(createInvoice, undefined);
 	const [form, fields] = useForm({
@@ -57,11 +59,24 @@ export function CreateInvoice({
 	const [rate, setRate] = useState('');
 	const [quantity, setQuantity] = useState('');
 	const [currency, setCurrency] = useState('NOK');
+	const [taxRate, setTaxRate] = useState(25); // Default MVA for Norway
+	const [invoiceNumber, setInvoiceNumber] = useState(nextInvoiceNumber);
 
-	const calculateTotal = (Number(quantity) || 0) * (Number(rate) || 0);
+	const calculateSubtotal = (Number(quantity) || 0) * (Number(rate) || 0);
+	const calculateTaxAmount = (calculateSubtotal * taxRate) / 100;
+	const calculateTotal = calculateSubtotal + calculateTaxAmount;
+
+	// Get default tax rate based on currency
+	useEffect(() => {
+		if (currency === 'NOK') {
+			setTaxRate(25); // Norwegian MVA
+		} else {
+			setTaxRate(0); // No default tax for other currencies
+		}
+	}, [currency]);
 
 	return (
-		<Card className="w-full max-w-4xl mx-auto">
+		<Card className="w-full max-w-4xl mx-auto gradient-card">
 			<CardContent className="p-6">
 				<form
 					action={action}
@@ -78,17 +93,41 @@ export function CreateInvoice({
 					<input
 						type="hidden"
 						name={fields.total.name}
-						value={calculateTotal}
+						value={Math.round(calculateTotal)}
+					/>
+
+					<input
+						type="hidden"
+						name={fields.subtotal.name}
+						value={Math.round(calculateSubtotal)}
+					/>
+
+					<input
+						type="hidden"
+						name={fields.taxAmount.name}
+						value={Math.round(calculateTaxAmount)}
+					/>
+
+					<input
+						type="hidden"
+						name={fields.taxRate.name}
+						value={taxRate}
 					/>
 
 					<div className="flex flex-col gap-1 w-fit mb-6">
 						<div className="flex items-center gap-4">
-							<Badge variant="secondary">Draft</Badge>
+							<Badge
+								variant="secondary"
+								className="bg-gradient-to-r from-blue-500 to-purple-500 text-white"
+							>
+								Draft
+							</Badge>
 							<Input
 								placeholder="Invoice Name"
 								name={fields.invoiceName.name}
 								key={fields.invoiceName.key}
 								defaultValue={fields.invoiceName.value}
+								className="border-primary/20 focus:border-primary"
 							/>
 						</div>
 						<p className="text-red-500 text-sm">
@@ -98,17 +137,22 @@ export function CreateInvoice({
 
 					<div className="grid md:grid-cols-3 gap-6 mb-6">
 						<div>
-							<Label>Invoice No.</Label>
+							<Label className="text-primary font-medium">
+								Invoice No.
+							</Label>
 							<div className="flex">
-								<span className="px-3 border border-r-0 rounded-l-md flex items-center bg-muted ">
+								<span className="px-3 border border-r-0 rounded-l-md flex items-center bg-gradient-to-r from-primary/10 to-accent/10 border-primary/20 font-semibold text-primary">
 									#
 								</span>
 								<Input
-									className="rounded-l-none"
-									placeholder="5"
+									className="rounded-l-none border-primary/20 focus:border-primary"
+									value={invoiceNumber}
+									onChange={(e) =>
+										setInvoiceNumber(Number(e.target.value))
+									}
 									name={fields.invoiceNumber.name}
 									key={fields.invoiceNumber.key}
-									defaultValue={fields.invoiceNumber.value}
+									type="number"
 								/>
 							</div>
 							<p className="text-red-500 text-sm">
@@ -117,37 +161,65 @@ export function CreateInvoice({
 						</div>
 
 						<div>
-							<Label>Currency</Label>
+							<Label className="text-primary font-medium">
+								Currency
+							</Label>
 							<Select
 								defaultValue="nok"
 								name={fields.currency.name}
 								key={fields.currency.key}
 								onValueChange={(value) => setCurrency(value)}
 							>
-								<SelectTrigger>
+								<SelectTrigger className="border-primary/20 focus:border-primary">
 									<SelectValue placeholder="Select a currency" />
 								</SelectTrigger>
 								<SelectContent>
-									<SelectItem value="nok">NOK</SelectItem>
-									<SelectItem value="eur">EUR</SelectItem>
-									<SelectItem value="usd">USD</SelectItem>
+									<SelectItem value="nok">🇳🇴 NOK</SelectItem>
+									<SelectItem value="eur">🇪🇺 EUR</SelectItem>
+									<SelectItem value="usd">🇺🇸 USD</SelectItem>
 								</SelectContent>
 							</Select>
 							<p className="text-red-500 text-sm">
 								{fields.currency.errors}
 							</p>
 						</div>
+
+						<div>
+							<Label className="text-primary font-medium">
+								Tax Rate {currency === 'NOK' ? '(MVA)' : ''}
+							</Label>
+							<div className="flex">
+								<Input
+									type="number"
+									placeholder="25"
+									value={taxRate}
+									onChange={(e) =>
+										setTaxRate(Number(e.target.value))
+									}
+									className="border-primary/20 focus:border-primary"
+									min="0"
+									max="100"
+									step="0.1"
+								/>
+								<span className="px-3 border border-l-0 rounded-r-md flex items-center bg-gradient-to-r from-primary/10 to-accent/10 border-primary/20 font-semibold text-primary">
+									%
+								</span>
+							</div>
+						</div>
 					</div>
 
 					<div className="grid md:grid-cols-2 gap-6 mb-6">
 						<div>
-							<Label>From</Label>
+							<Label className="text-primary font-medium">
+								From
+							</Label>
 							<div className="space-y-2">
 								<Input
 									placeholder="Your Name"
 									name={fields.fromName.name}
 									key={fields.fromName.key}
 									defaultValue={`${firstName} ${lastName}`}
+									className="border-primary/20 focus:border-primary"
 								/>
 								<p className="text-red-500 text-sm">
 									{fields.fromName.errors}
@@ -157,6 +229,7 @@ export function CreateInvoice({
 									name={fields.fromEmail.name}
 									key={fields.fromEmail.key}
 									defaultValue={email}
+									className="border-primary/20 focus:border-primary"
 								/>
 								<p className="text-red-500 text-sm">
 									{fields.fromEmail.errors}
@@ -166,6 +239,7 @@ export function CreateInvoice({
 									name={fields.fromAddress.name}
 									key={fields.fromAddress.key}
 									defaultValue={address}
+									className="border-primary/20 focus:border-primary"
 								/>
 								<p className="text-red-500 text-sm">
 									{fields.fromAddress.errors}
@@ -174,7 +248,9 @@ export function CreateInvoice({
 						</div>
 
 						<div>
-							<Label>To</Label>
+							<Label className="text-primary font-medium">
+								To
+							</Label>
 							<div className="space-y-2">
 								<Input
 									placeholder="Client Name"
@@ -183,6 +259,7 @@ export function CreateInvoice({
 									defaultValue={
 										fields.clientName.initialValue
 									}
+									className="border-primary/20 focus:border-primary"
 								/>
 								<p className="text-red-500 text-sm">
 									{fields.clientName.errors}
@@ -194,6 +271,7 @@ export function CreateInvoice({
 									defaultValue={
 										fields.clientEmail.initialValue
 									}
+									className="border-primary/20 focus:border-primary"
 								/>
 								<p className="text-red-500 text-sm">
 									{fields.clientEmail.errors}
@@ -205,6 +283,7 @@ export function CreateInvoice({
 									defaultValue={
 										fields.clientAddress.initialValue
 									}
+									className="border-primary/20 focus:border-primary"
 								/>
 								<p className="text-red-500 text-sm">
 									{fields.clientAddress.errors}
@@ -216,13 +295,15 @@ export function CreateInvoice({
 					<div className="grid md:grid-cols-2 gap-6 mb-6">
 						<div>
 							<div>
-								<Label>Invoice Date</Label>
+								<Label className="text-primary font-medium">
+									Invoice Date
+								</Label>
 							</div>
 							<Popover>
 								<PopoverTrigger asChild>
 									<Button
 										variant="outline"
-										className="w-full"
+										className="w-full border-primary/20 hover:border-primary"
 									>
 										<CalendarIcon />
 										{selectedDate ? (
@@ -251,13 +332,15 @@ export function CreateInvoice({
 						</div>
 
 						<div>
-							<Label>Due Date</Label>
+							<Label className="text-primary font-medium">
+								Due Date
+							</Label>
 							<Select
 								name={fields.dueDate.name}
 								key={fields.dueDate.key}
 								defaultValue={fields.dueDate.initialValue}
 							>
-								<SelectTrigger className="w-full">
+								<SelectTrigger className="w-full border-primary/20 focus:border-primary">
 									<SelectValue placeholder="Select a due date" />
 								</SelectTrigger>
 
@@ -278,7 +361,7 @@ export function CreateInvoice({
 					</div>
 
 					<div>
-						<div className="grid grid-cols-12 gap-4 mb-2 font-medium">
+						<div className="grid grid-cols-12 gap-4 mb-2 font-medium text-primary">
 							<p className="col-span-6">Description</p>
 							<p className="col-span-2">Quantity</p>
 							<p className="col-span-2">Rate</p>
@@ -295,6 +378,7 @@ export function CreateInvoice({
 										fields.invoiceItemDescription
 											.initialValue
 									}
+									className="border-primary/20 focus:border-primary"
 								/>
 								<p className="text-red-500 text-sm">
 									{fields.invoiceItemDescription.errors}
@@ -310,6 +394,7 @@ export function CreateInvoice({
 									onChange={(e) =>
 										setQuantity(e.target.value)
 									}
+									className="border-primary/20 focus:border-primary"
 								/>
 								<p className="text-red-500 text-sm">
 									{fields.invoiceItemQuantity.errors}
@@ -323,6 +408,7 @@ export function CreateInvoice({
 									key={fields.invoiceItemRate.key}
 									value={rate}
 									onChange={(e) => setRate(e.target.value)}
+									className="border-primary/20 focus:border-primary"
 								/>
 								<p className="text-red-500 text-sm">
 									{fields.invoiceItemRate.errors}
@@ -332,24 +418,25 @@ export function CreateInvoice({
 								<Input
 									disabled
 									value={formatCurrency({
-										amount: calculateTotal,
+										amount: calculateSubtotal,
 										currency: currency as
 											| 'NOK'
 											| 'USD'
 											| 'EUR',
 									})}
+									className="bg-gradient-to-r from-primary/5 to-accent/5 font-semibold"
 								/>
 							</div>
 						</div>
 					</div>
 
 					<div className="flex justify-end">
-						<div className="w-1/3">
-							<div className="flex justify-between py-2">
+						<div className="w-1/3 space-y-2">
+							<div className="flex justify-between py-2 text-muted-foreground">
 								<span>Subtotal</span>
 								<span>
 									{formatCurrency({
-										amount: calculateTotal,
+										amount: calculateSubtotal,
 										currency: currency as
 											| 'NOK'
 											| 'USD'
@@ -357,9 +444,28 @@ export function CreateInvoice({
 									})}
 								</span>
 							</div>
-							<div className="flex justify-between py-2 border-t">
-								<span>Total ({currency.toUpperCase()})</span>
-								<span className="font-medium underline underline-offset-2">
+							{taxRate > 0 && (
+								<div className="flex justify-between py-2 text-muted-foreground">
+									<span>
+										{currency === 'NOK' ? 'MVA' : 'Tax'} (
+										{taxRate}%)
+									</span>
+									<span>
+										{formatCurrency({
+											amount: calculateTaxAmount,
+											currency: currency as
+												| 'NOK'
+												| 'USD'
+												| 'EUR',
+										})}
+									</span>
+								</div>
+							)}
+							<div className="flex justify-between py-2 border-t border-primary/20 bg-gradient-to-r from-primary/5 to-accent/5 px-2 rounded">
+								<span className="font-semibold text-primary">
+									Total ({currency.toUpperCase()})
+								</span>
+								<span className="font-bold text-primary underline underline-offset-2">
 									{formatCurrency({
 										amount: calculateTotal,
 										currency: currency as
@@ -372,13 +478,16 @@ export function CreateInvoice({
 						</div>
 					</div>
 
-					<div>
-						<Label>Notes</Label>
+					<div className="mt-6">
+						<Label className="text-primary font-medium">
+							Notes
+						</Label>
 						<Textarea
 							placeholder="Add your note's right here..."
 							name={fields.note.name}
 							key={fields.note.key}
 							defaultValue={fields.note.initialValue}
+							className="border-primary/20 focus:border-primary"
 						/>
 						<p className="text-red-500 text-sm">
 							{fields.note.errors}
@@ -387,7 +496,7 @@ export function CreateInvoice({
 
 					<div className="flex items-center justify-end mt-6">
 						<div>
-							<SubmitButton text="Send Invoice to Client" />
+							<SubmitButton text="📧 Send Invoice to Client" />
 						</div>
 					</div>
 				</form>

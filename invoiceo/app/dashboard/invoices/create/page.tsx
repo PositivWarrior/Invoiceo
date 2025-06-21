@@ -1,6 +1,6 @@
 import { CreateInvoice } from '@/app/components/CreateInvoice';
 import prisma from '@/app/utils/db';
-import { requireUser } from '@/app/utils/hooks';
+import { requireUser, getNextInvoiceNumber } from '@/app/utils/hooks';
 
 async function getUserData(userId: string) {
 	const data = await prisma.user.findUnique({
@@ -21,6 +21,9 @@ async function getUserData(userId: string) {
 export default async function InvoiceCreationRoute() {
 	const session = await requireUser();
 	const data = await getUserData(session.user?.id as string);
+	const nextInvoiceNumber = await getNextInvoiceNumber(
+		session.user?.id as string,
+	);
 
 	return (
 		<CreateInvoice
@@ -28,6 +31,7 @@ export default async function InvoiceCreationRoute() {
 			lastName={data?.lastName as string}
 			address={data?.address as string}
 			email={data?.email as string}
+			nextInvoiceNumber={nextInvoiceNumber}
 		/>
 	);
 }

@@ -66,6 +66,10 @@ export async function createInvoice(
 			note: submission.value.note,
 			status: submission.value.status,
 			total: submission.value.total,
+			// TODO: Temporarily commented out until Prisma client is regenerated
+			// taxRate: submission.value.taxRate || 0,
+			// taxAmount: submission.value.taxAmount || 0,
+			// subtotal: submission.value.subtotal || 0,
 			userId: session.user?.id,
 		},
 	});

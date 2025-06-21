@@ -6,9 +6,16 @@ import { RainbowButton } from '@/components/magicui/rainbow-button';
 
 export default function Navbar() {
 	return (
-		<div className="flex items-center justify-between">
-			<Link href="/">
-				<Image src={Logo} alt="Logo" className="size-50" />
+		<div className="flex items-center justify-between px-4 py-1 bg-gradient-to-r from-primary/5 via-accent/5 to-secondary/10 rounded-xl mb-4 border border-primary/10 backdrop-blur-sm">
+			<Link
+				href="/"
+				className="hover:scale-105 transition-transform duration-200"
+			>
+				<Image
+					src={Logo}
+					alt="Logo"
+					className="size-50 drop-shadow-lg"
+				/>
 			</Link>
 
 			<Link href="/login">

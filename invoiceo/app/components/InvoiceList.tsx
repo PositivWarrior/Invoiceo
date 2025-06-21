@@ -39,6 +39,29 @@ export async function InvoiceList() {
 	const session = await requireUser();
 	const data = await getData(session.user?.id as string);
 
+	const getStatusBadge = (status: string) => {
+		switch (status) {
+			case 'PAID':
+				return (
+					<Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0 shadow-md">
+						✅ {status}
+					</Badge>
+				);
+			case 'PENDING':
+				return (
+					<Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0 shadow-md">
+						⏳ {status}
+					</Badge>
+				);
+			default:
+				return (
+					<Badge className="bg-gradient-to-r from-gray-500 to-slate-500 text-white border-0 shadow-md">
+						{status}
+					</Badge>
+				);
+		}
+	};
+
 	return (
 		<>
 			{data.length === 0 ? (
@@ -49,52 +72,75 @@ export async function InvoiceList() {
 					href="/dashboard/invoices/create"
 				/>
 			) : (
-				<Table>
-					<TableHeader>
-						<TableRow>
-							<TableHead>Invoice ID</TableHead>
-							<TableHead>Customer</TableHead>
-							<TableHead>Amount</TableHead>
-							<TableHead>Status</TableHead>
-							<TableHead>Date</TableHead>
-							<TableHead className="text-right">
-								Actions
-							</TableHead>
-						</TableRow>
-					</TableHeader>
-
-					<TableBody>
-						{data.map((invoice) => (
-							<TableRow key={invoice.id}>
-								<TableCell>#{invoice.invoiceNumber}</TableCell>
-								<TableCell>{invoice.clientName}</TableCell>
-								<TableCell>
-									{formatCurrency({
-										amount: invoice.total,
-										currency: invoice.currency as
-											| 'NOK'
-											| 'USD'
-											| 'EUR',
-									})}
-								</TableCell>
-								<TableCell>
-									<Badge>{invoice.status}</Badge>
-								</TableCell>
-								<TableCell>
-									{new Intl.DateTimeFormat('en-GB', {
-										dateStyle: 'medium',
-									}).format(new Date(invoice.createdAt))}
-								</TableCell>
-								<TableCell className="text-right">
-									<InvoiceActions
-										id={invoice.id}
-										status={invoice.status}
-									/>
-								</TableCell>
+				<div className="rounded-lg border border-primary/20 bg-gradient-to-br from-card to-accent/5 shadow-lg overflow-hidden">
+					<Table>
+						<TableHeader>
+							<TableRow className="bg-gradient-to-r from-primary/10 to-accent/10 border-b border-primary/20">
+								<TableHead className="font-semibold text-primary">
+									Invoice ID
+								</TableHead>
+								<TableHead className="font-semibold text-primary">
+									Customer
+								</TableHead>
+								<TableHead className="font-semibold text-primary">
+									Amount
+								</TableHead>
+								<TableHead className="font-semibold text-primary">
+									Status
+								</TableHead>
+								<TableHead className="font-semibold text-primary">
+									Date
+								</TableHead>
+								<TableHead className="text-right font-semibold text-primary">
+									Actions
+								</TableHead>
 							</TableRow>
-						))}
-					</TableBody>
-				</Table>
+						</TableHeader>
+
+						<TableBody>
+							{data.map((invoice, index) => (
+								<TableRow
+									key={invoice.id}
+									className={`hover:bg-gradient-to-r hover:from-primary/5 hover:to-accent/5 transition-all duration-200 ${
+										index % 2 === 0
+											? 'bg-white/50'
+											: 'bg-accent/5'
+									}`}
+								>
+									<TableCell className="font-medium text-primary">
+										#{invoice.invoiceNumber}
+									</TableCell>
+									<TableCell className="font-medium">
+										{invoice.clientName}
+									</TableCell>
+									<TableCell className="font-semibold text-emerald-600">
+										{formatCurrency({
+											amount: invoice.total,
+											currency: invoice.currency as
+												| 'NOK'
+												| 'USD'
+												| 'EUR',
+										})}
+									</TableCell>
+									<TableCell>
+										{getStatusBadge(invoice.status)}
+									</TableCell>
+									<TableCell className="text-muted-foreground">
+										{new Intl.DateTimeFormat('en-GB', {
+											dateStyle: 'medium',
+										}).format(new Date(invoice.createdAt))}
+									</TableCell>
+									<TableCell className="text-right">
+										<InvoiceActions
+											id={invoice.id}
+											status={invoice.status}
+										/>
+									</TableCell>
+								</TableRow>
+							))}
+						</TableBody>
+					</Table>
+				</div>
 			)}
 		</>
 	);

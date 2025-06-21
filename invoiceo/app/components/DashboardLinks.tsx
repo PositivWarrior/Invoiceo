@@ -29,15 +29,20 @@ export default function DashboardLinks() {
 				<Link
 					className={cn(
 						pathname === link.href
-							? 'text-primary bg-primary/10'
-							: 'text-muted-foreground hover:text-foreground',
-						'flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:text-primary',
+							? 'text-white bg-gradient-to-r from-primary to-accent shadow-lg border border-primary/20'
+							: 'text-muted-foreground hover:text-primary hover:bg-gradient-to-r hover:from-primary/10 hover:to-accent/10',
+						'flex items-center gap-3 rounded-lg px-3 py-2 transition-all duration-200 hover:shadow-md hover:scale-105 active:scale-95',
 					)}
 					href={link.href}
 					key={link.id}
 				>
-					<link.icon className="size-4" />
-					{link.name}
+					<link.icon
+						className={cn(
+							'size-4',
+							pathname === link.href ? 'text-white' : '',
+						)}
+					/>
+					<span className="font-medium">{link.name}</span>
 				</Link>
 			))}
 		</>
