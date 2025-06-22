@@ -8,7 +8,7 @@ export default function Hero() {
 		<section className="flex flex-col items-center justify-center relative py-12 lg:py-20">
 			<div className="text-center">
 				<span className="text-sm text-primary font-medium tracking-tight bg-gradient-to-r from-primary/20 to-accent/20 px-6 py-3 rounded-full border border-primary/30 backdrop-blur-sm shadow-lg">
-					✨ Introducing Invoiceo
+					Introducing Invoiceo
 				</span>
 
 				<h1 className="mt-8 text-4xl sm:text-6xl md:text-7xl lg:text-8xl font-semibold tracking-tighter">
@@ -20,12 +20,12 @@ export default function Hero() {
 
 				<p className="max-w-xl mx-auto mt-4 lg:text-lg text-muted-foreground">
 					Creating Invoices can be a pain! I try to make it a little
-					bit simpler ⚡
+					bit simpler
 				</p>
 
 				<div className="mt-8 mb-12">
 					<Link href="/login">
-						<RainbowButton>🚀 Get Unlimited Access</RainbowButton>
+						<RainbowButton>Get Unlimited Access</RainbowButton>
 					</Link>
 				</div>
 			</div>

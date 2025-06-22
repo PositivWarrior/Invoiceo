@@ -37,23 +37,26 @@ export async function RecentInvoices() {
 
 			<CardContent className="flex flex-col gap-4">
 				{data.map((item) => (
-					<div className="flex items-center gap-4" key={item.id}>
-						<Avatar className="hidden sm:flex size-9">
+					<div
+						className="flex items-center gap-2 md:gap-4"
+						key={item.id}
+					>
+						<Avatar className="hidden sm:flex size-9 flex-shrink-0">
 							<AvatarFallback>
 								{item.clientName.slice(0, 2)}
 							</AvatarFallback>
 						</Avatar>
 
-						<div className="flex flex-col gap-1">
-							<p className="text-sm font-medium leading-none">
+						<div className="flex flex-col gap-1 min-w-0 flex-1">
+							<p className="text-sm font-medium leading-none truncate">
 								{item.clientName}
 							</p>
-							<p className="text-sm text-muted-foreground">
+							<p className="text-sm text-muted-foreground truncate">
 								{item.clientEmail}
 							</p>
 						</div>
 
-						<div className="text-sm font-medium text-muted-foreground ml-auto">
+						<div className="text-sm font-medium text-muted-foreground flex-shrink-0">
 							{formatCurrency({
 								amount: item.total,
 								currency: item.currency as
