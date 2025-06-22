@@ -14,7 +14,7 @@ export default function Navbar() {
 				<Image
 					src={Logo}
 					alt="Logo"
-					className="size-50 drop-shadow-lg"
+					className="size-30 drop-shadow-lg"
 				/>
 			</Link>
 

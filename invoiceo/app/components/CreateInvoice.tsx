@@ -1,7 +1,9 @@
 'use client';
 
-import { Card, CardContent } from '@/components/ui/card';
+import { createInvoice } from '@/app/actions';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import {
@@ -17,15 +19,9 @@ import {
 	PopoverContent,
 	PopoverTrigger,
 } from '@/components/ui/popover';
-import { Button } from '@/components/ui/button';
-import { CalendarIcon } from 'lucide-react';
-import { useActionState, useState, useEffect } from 'react';
 import { Textarea } from '@/components/ui/textarea';
-import { SubmitButton } from './SubmitButtons';
-import { createInvoice } from '../actions';
-import { useForm } from '@conform-to/react';
-import { parseWithZod } from '@conform-to/zod';
-import { invoiceSchema } from '../utils/zodSchemas';
+import { CalendarIcon, Send } from 'lucide-react';
+import { useActionState, useState, useEffect, useCallback } from 'react';
 import { formatCurrency } from '../utils/formatCurrency';
 
 interface CreateInvoiceProps {
@@ -43,28 +39,25 @@ export function CreateInvoice({
 	email,
 	nextInvoiceNumber,
 }: CreateInvoiceProps) {
-	const [lastResult, action] = useActionState(createInvoice, undefined);
-	const [form, fields] = useForm({
-		lastResult,
-		onValidate({ formData }) {
-			return parseWithZod(formData, {
-				schema: invoiceSchema,
-			});
-		},
-		shouldValidate: 'onBlur',
-		shouldRevalidate: 'onInput',
-	});
+	const [state, action] = useActionState(createInvoice, undefined);
 
 	const [selectedDate, setSelectedDate] = useState(new Date());
 	const [rate, setRate] = useState('');
 	const [quantity, setQuantity] = useState('');
 	const [currency, setCurrency] = useState('NOK');
 	const [taxRate, setTaxRate] = useState(25); // Default MVA for Norway
-	const [invoiceNumber, setInvoiceNumber] = useState(nextInvoiceNumber);
 
-	const calculateSubtotal = (Number(quantity) || 0) * (Number(rate) || 0);
-	const calculateTaxAmount = (calculateSubtotal * taxRate) / 100;
-	const calculateTotal = calculateSubtotal + calculateTaxAmount;
+	const calculateSubtotal = useCallback(() => {
+		return (Number(quantity) || 0) * (Number(rate) || 0);
+	}, [quantity, rate]);
+
+	const calculateTaxAmount = useCallback(() => {
+		return (calculateSubtotal() * taxRate) / 100;
+	}, [calculateSubtotal, taxRate]);
+
+	const calculateTotal = useCallback(() => {
+		return calculateSubtotal() + calculateTaxAmount();
+	}, [calculateSubtotal, calculateTaxAmount]);
 
 	// Get default tax rate based on currency
 	useEffect(() => {
@@ -75,43 +68,39 @@ export function CreateInvoice({
 		}
 	}, [currency]);
 
+	const subtotal = calculateSubtotal();
+	const taxAmount = calculateTaxAmount();
+	const total = calculateTotal();
+
 	return (
 		<Card className="w-full max-w-4xl mx-auto gradient-card">
 			<CardContent className="p-6">
-				<form
-					action={action}
-					id={form.id}
-					onSubmit={form.onSubmit}
-					noValidate
-				>
+				<form action={action}>
 					<input
 						type="hidden"
-						name={fields.date.name}
+						name="date"
 						value={selectedDate.toISOString()}
 					/>
-
 					<input
 						type="hidden"
-						name={fields.total.name}
-						value={Math.round(calculateTotal)}
+						name="total"
+						value={Math.round(total)}
 					/>
-
 					<input
 						type="hidden"
-						name={fields.subtotal.name}
-						value={Math.round(calculateSubtotal)}
+						name="subtotal"
+						value={Math.round(subtotal)}
 					/>
-
 					<input
 						type="hidden"
-						name={fields.taxAmount.name}
-						value={Math.round(calculateTaxAmount)}
+						name="taxAmount"
+						value={Math.round(taxAmount)}
 					/>
-
+					<input type="hidden" name="taxRate" value={taxRate} />
 					<input
 						type="hidden"
-						name={fields.taxRate.name}
-						value={taxRate}
+						name="invoiceNumber"
+						value={nextInvoiceNumber}
 					/>
 
 					<div className="flex flex-col gap-1 w-fit mb-6">
@@ -120,19 +109,22 @@ export function CreateInvoice({
 								variant="secondary"
 								className="bg-gradient-to-r from-blue-500 to-purple-500 text-white"
 							>
-								Draft
+								New Invoice
 							</Badge>
 							<Input
 								placeholder="Invoice Name"
-								name={fields.invoiceName.name}
-								key={fields.invoiceName.key}
-								defaultValue={fields.invoiceName.value}
-								className="border-primary/20 focus:border-primary"
+								name="invoiceName"
+								className="text-2xl font-semibold border-primary/20 focus:border-primary"
 							/>
 						</div>
-						<p className="text-red-500 text-sm">
-							{fields.invoiceName.errors}
-						</p>
+						<span className="text-sm text-muted-foreground">
+							Invoice #{nextInvoiceNumber}
+						</span>
+						{state?.errors?.invoiceName && (
+							<p className="text-red-500 text-sm">
+								{state.errors.invoiceName}
+							</p>
+						)}
 					</div>
 
 					<div className="grid md:grid-cols-3 gap-6 mb-6">
@@ -146,18 +138,11 @@ export function CreateInvoice({
 								</span>
 								<Input
 									className="rounded-l-none border-primary/20 focus:border-primary"
-									value={invoiceNumber}
-									onChange={(e) =>
-										setInvoiceNumber(Number(e.target.value))
-									}
-									name={fields.invoiceNumber.name}
-									key={fields.invoiceNumber.key}
+									value={nextInvoiceNumber}
+									disabled
 									type="number"
 								/>
 							</div>
-							<p className="text-red-500 text-sm">
-								{fields.invoiceNumber.errors}
-							</p>
 						</div>
 
 						<div>
@@ -165,23 +150,24 @@ export function CreateInvoice({
 								Currency
 							</Label>
 							<Select
-								defaultValue="nok"
-								name={fields.currency.name}
-								key={fields.currency.key}
+								defaultValue="NOK"
+								name="currency"
 								onValueChange={(value) => setCurrency(value)}
 							>
 								<SelectTrigger className="border-primary/20 focus:border-primary">
 									<SelectValue placeholder="Select a currency" />
 								</SelectTrigger>
 								<SelectContent>
-									<SelectItem value="nok">🇳🇴 NOK</SelectItem>
-									<SelectItem value="eur">🇪🇺 EUR</SelectItem>
-									<SelectItem value="usd">🇺🇸 USD</SelectItem>
+									<SelectItem value="NOK">🇳🇴 NOK</SelectItem>
+									<SelectItem value="EUR">🇪🇺 EUR</SelectItem>
+									<SelectItem value="USD">🇺🇸 USD</SelectItem>
 								</SelectContent>
 							</Select>
-							<p className="text-red-500 text-sm">
-								{fields.currency.errors}
-							</p>
+							{state?.errors?.currency && (
+								<p className="text-red-500 text-sm">
+									{state.errors.currency}
+								</p>
+							)}
 						</div>
 
 						<div>
@@ -216,34 +202,37 @@ export function CreateInvoice({
 							<div className="space-y-2">
 								<Input
 									placeholder="Your Name"
-									name={fields.fromName.name}
-									key={fields.fromName.key}
+									name="fromName"
 									defaultValue={`${firstName} ${lastName}`}
 									className="border-primary/20 focus:border-primary"
 								/>
-								<p className="text-red-500 text-sm">
-									{fields.fromName.errors}
-								</p>
+								{state?.errors?.fromName && (
+									<p className="text-red-500 text-sm">
+										{state.errors.fromName}
+									</p>
+								)}
 								<Input
 									placeholder="Your Email"
-									name={fields.fromEmail.name}
-									key={fields.fromEmail.key}
+									name="fromEmail"
 									defaultValue={email}
 									className="border-primary/20 focus:border-primary"
 								/>
-								<p className="text-red-500 text-sm">
-									{fields.fromEmail.errors}
-								</p>
+								{state?.errors?.fromEmail && (
+									<p className="text-red-500 text-sm">
+										{state.errors.fromEmail}
+									</p>
+								)}
 								<Input
 									placeholder="Your Address"
-									name={fields.fromAddress.name}
-									key={fields.fromAddress.key}
+									name="fromAddress"
 									defaultValue={address}
 									className="border-primary/20 focus:border-primary"
 								/>
-								<p className="text-red-500 text-sm">
-									{fields.fromAddress.errors}
-								</p>
+								{state?.errors?.fromAddress && (
+									<p className="text-red-500 text-sm">
+										{state.errors.fromAddress}
+									</p>
+								)}
 							</div>
 						</div>
 
@@ -254,51 +243,43 @@ export function CreateInvoice({
 							<div className="space-y-2">
 								<Input
 									placeholder="Client Name"
-									name={fields.clientName.name}
-									key={fields.clientName.key}
-									defaultValue={
-										fields.clientName.initialValue
-									}
+									name="clientName"
 									className="border-primary/20 focus:border-primary"
 								/>
-								<p className="text-red-500 text-sm">
-									{fields.clientName.errors}
-								</p>
+								{state?.errors?.clientName && (
+									<p className="text-red-500 text-sm">
+										{state.errors.clientName}
+									</p>
+								)}
 								<Input
 									placeholder="Client Email"
-									name={fields.clientEmail.name}
-									key={fields.clientEmail.key}
-									defaultValue={
-										fields.clientEmail.initialValue
-									}
+									name="clientEmail"
 									className="border-primary/20 focus:border-primary"
 								/>
-								<p className="text-red-500 text-sm">
-									{fields.clientEmail.errors}
-								</p>
+								{state?.errors?.clientEmail && (
+									<p className="text-red-500 text-sm">
+										{state.errors.clientEmail}
+									</p>
+								)}
 								<Input
 									placeholder="Client Address"
-									name={fields.clientAddress.name}
-									key={fields.clientAddress.key}
-									defaultValue={
-										fields.clientAddress.initialValue
-									}
+									name="clientAddress"
 									className="border-primary/20 focus:border-primary"
 								/>
-								<p className="text-red-500 text-sm">
-									{fields.clientAddress.errors}
-								</p>
+								{state?.errors?.clientAddress && (
+									<p className="text-red-500 text-sm">
+										{state.errors.clientAddress}
+									</p>
+								)}
 							</div>
 						</div>
 					</div>
 
 					<div className="grid md:grid-cols-2 gap-6 mb-6">
 						<div>
-							<div>
-								<Label className="text-primary font-medium">
-									Invoice Date
-								</Label>
-							</div>
+							<Label className="text-primary font-medium">
+								Invoice Date
+							</Label>
 							<Popover>
 								<PopoverTrigger asChild>
 									<Button
@@ -326,37 +307,31 @@ export function CreateInvoice({
 									/>
 								</PopoverContent>
 							</Popover>
-							<p className="text-red-500 text-sm">
-								{fields.date.errors}
-							</p>
 						</div>
 
 						<div>
 							<Label className="text-primary font-medium">
 								Due Date
 							</Label>
-							<Select
-								name={fields.dueDate.name}
-								key={fields.dueDate.key}
-								defaultValue={fields.dueDate.initialValue}
-							>
+							<Select name="dueDate">
 								<SelectTrigger className="w-full border-primary/20 focus:border-primary">
 									<SelectValue placeholder="Select a due date" />
 								</SelectTrigger>
-
 								<SelectContent>
 									<SelectItem value="0">
 										Due on Receipt
 									</SelectItem>
-									<SelectItem value="14">2 weeks</SelectItem>
+									<SelectItem value="15">2 weeks</SelectItem>
 									<SelectItem value="30">
 										One month
 									</SelectItem>
 								</SelectContent>
 							</Select>
-							<p className="text-red-500 text-sm">
-								{fields.dueDate.errors}
-							</p>
+							{state?.errors?.dueDate && (
+								<p className="text-red-500 text-sm">
+									{state.errors.dueDate}
+								</p>
+							)}
 						</div>
 					</div>
 
@@ -372,53 +347,52 @@ export function CreateInvoice({
 							<div className="col-span-6">
 								<Textarea
 									placeholder="Item name & description"
-									name={fields.invoiceItemDescription.name}
-									key={fields.invoiceItemDescription.key}
-									defaultValue={
-										fields.invoiceItemDescription
-											.initialValue
-									}
+									name="invoiceItemDescription"
 									className="border-primary/20 focus:border-primary"
 								/>
-								<p className="text-red-500 text-sm">
-									{fields.invoiceItemDescription.errors}
-								</p>
+								{state?.errors?.invoiceItemDescription && (
+									<p className="text-red-500 text-sm mt-1">
+										{state.errors.invoiceItemDescription}
+									</p>
+								)}
 							</div>
 							<div className="col-span-2">
 								<Input
 									type="number"
 									placeholder="0"
-									name={fields.invoiceItemQuantity.name}
-									key={fields.invoiceItemQuantity.key}
+									name="invoiceItemQuantity"
 									value={quantity}
 									onChange={(e) =>
 										setQuantity(e.target.value)
 									}
 									className="border-primary/20 focus:border-primary"
 								/>
-								<p className="text-red-500 text-sm">
-									{fields.invoiceItemQuantity.errors}
-								</p>
+								{state?.errors?.invoiceItemQuantity && (
+									<p className="text-red-500 text-sm mt-1">
+										{state.errors.invoiceItemQuantity}
+									</p>
+								)}
 							</div>
 							<div className="col-span-2">
 								<Input
 									type="number"
 									placeholder="0"
-									name={fields.invoiceItemRate.name}
-									key={fields.invoiceItemRate.key}
+									name="invoiceItemRate"
 									value={rate}
 									onChange={(e) => setRate(e.target.value)}
 									className="border-primary/20 focus:border-primary"
 								/>
-								<p className="text-red-500 text-sm">
-									{fields.invoiceItemRate.errors}
-								</p>
+								{state?.errors?.invoiceItemRate && (
+									<p className="text-red-500 text-sm mt-1">
+										{state.errors.invoiceItemRate}
+									</p>
+								)}
 							</div>
 							<div className="col-span-2">
 								<Input
 									disabled
 									value={formatCurrency({
-										amount: calculateSubtotal,
+										amount: subtotal,
 										currency: currency as
 											| 'NOK'
 											| 'USD'
@@ -436,7 +410,7 @@ export function CreateInvoice({
 								<span>Subtotal</span>
 								<span>
 									{formatCurrency({
-										amount: calculateSubtotal,
+										amount: subtotal,
 										currency: currency as
 											| 'NOK'
 											| 'USD'
@@ -452,7 +426,7 @@ export function CreateInvoice({
 									</span>
 									<span>
 										{formatCurrency({
-											amount: calculateTaxAmount,
+											amount: taxAmount,
 											currency: currency as
 												| 'NOK'
 												| 'USD'
@@ -467,7 +441,7 @@ export function CreateInvoice({
 								</span>
 								<span className="font-bold text-primary underline underline-offset-2">
 									{formatCurrency({
-										amount: calculateTotal,
+										amount: total,
 										currency: currency as
 											| 'NOK'
 											| 'USD'
@@ -484,20 +458,24 @@ export function CreateInvoice({
 						</Label>
 						<Textarea
 							placeholder="Add your note's right here..."
-							name={fields.note.name}
-							key={fields.note.key}
-							defaultValue={fields.note.initialValue}
+							name="note"
 							className="border-primary/20 focus:border-primary"
 						/>
-						<p className="text-red-500 text-sm">
-							{fields.note.errors}
-						</p>
+						{state?.errors?.note && (
+							<p className="text-red-500 text-sm">
+								{state.errors.note}
+							</p>
+						)}
 					</div>
 
-					<div className="flex items-center justify-end mt-6">
-						<div>
-							<SubmitButton text="📧 Send Invoice to Client" />
-						</div>
+					<div className="flex items-center justify-end gap-4 mt-6">
+						<Button
+							type="submit"
+							className="bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90"
+						>
+							<Send className="mr-2 size-4" />
+							Send Invoice
+						</Button>
 					</div>
 				</form>
 			</CardContent>

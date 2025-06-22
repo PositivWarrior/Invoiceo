@@ -11,12 +11,11 @@ import {
 	CheckCircle,
 	DownloadCloud,
 	Mail,
-	MoreHorizontalIcon,
-	PencilIcon,
+	MoreHorizontal,
+	Pencil,
 	Trash,
 } from 'lucide-react';
 import Link from 'next/link';
-import { toast } from 'sonner';
 
 interface InvoiceActionsProps {
 	id: string;
@@ -24,60 +23,64 @@ interface InvoiceActionsProps {
 }
 
 export function InvoiceActions({ id, status }: InvoiceActionsProps) {
-	const handleSendReminder = () => {
-		toast.promise(
-			fetch(`/api/email/${id}`, {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
-			}),
-			{
-				loading: 'Sending reminder...',
-				success: 'Reminder sent successfully',
-				error: 'Failed to send reminder',
-			},
-		);
-	};
-
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>
-				<Button variant="secondary" size="icon">
-					<MoreHorizontalIcon className="size-4" />
+				<Button
+					size="sm"
+					variant="ghost"
+					className="h-8 w-8 p-0 hover:bg-gradient-to-r hover:from-primary/10 hover:to-accent/10"
+				>
+					<MoreHorizontal className="h-4 w-4" />
 				</Button>
 			</DropdownMenuTrigger>
-			<DropdownMenuContent align="end">
+			<DropdownMenuContent align="end" className="gradient-border">
 				<DropdownMenuItem asChild>
-					<Link href={`/dashboard/invoices/${id}`}>
-						<PencilIcon className="size-4 mr-2" />
+					<Link
+						href={`/dashboard/invoices/${id}`}
+						className="hover:bg-gradient-to-r hover:from-primary/5 hover:to-accent/5"
+					>
+						<Pencil className="size-4 mr-2 text-primary" />
 						Edit Invoice
 					</Link>
 				</DropdownMenuItem>
 				<DropdownMenuItem asChild>
-					<Link href={`/api/invoice/${id}`} target="_blank">
-						<DownloadCloud className="size-4 mr-2" />
+					<Link
+						href={`/api/invoice/${id}`}
+						target="_blank"
+						className="hover:bg-gradient-to-r hover:from-success/5 hover:to-success/10"
+					>
+						<DownloadCloud className="size-4 mr-2 text-success" />
 						Download Invoice
 					</Link>
 				</DropdownMenuItem>
-				<DropdownMenuItem onClick={handleSendReminder}>
-					<Mail className="size-4 mr-2" />
-					Send Reminder
+				<DropdownMenuItem asChild>
+					<Link
+						href={`/api/email/${id}`}
+						className="hover:bg-gradient-to-r hover:from-info/5 hover:to-info/10"
+					>
+						<Mail className="size-4 mr-2 text-info" />
+						Reminder Email
+					</Link>
 				</DropdownMenuItem>
 				<DropdownMenuItem asChild>
-					<Link href={`/dashboard/invoices/${id}/delete`}>
-						<Trash className="size-4 mr-2" />
+					<Link
+						href={`/dashboard/invoices/${id}/paid`}
+						className="hover:bg-gradient-to-r hover:from-accent/5 hover:to-accent/10"
+					>
+						<CheckCircle className="size-4 mr-2 text-accent" />
+						Mark as Paid
+					</Link>
+				</DropdownMenuItem>
+				<DropdownMenuItem asChild>
+					<Link
+						href={`/dashboard/invoices/${id}/delete`}
+						className="hover:bg-gradient-to-r hover:from-destructive/5 hover:to-destructive/10"
+					>
+						<Trash className="size-4 mr-2 text-destructive" />
 						Delete Invoice
 					</Link>
 				</DropdownMenuItem>
-				{status !== 'PAID' && (
-					<DropdownMenuItem asChild>
-						<Link href={`/dashboard/invoices/${id}/paid`}>
-							<CheckCircle className="size-4 mr-2" />
-							Mark as paid
-						</Link>
-					</DropdownMenuItem>
-				)}
 			</DropdownMenuContent>
 		</DropdownMenu>
 	);

@@ -24,7 +24,7 @@ export default function DashboardLinks() {
 	const pathname = usePathname();
 
 	return (
-		<>
+		<div className="mt-8 space-y-2">
 			{dashboardLinks.map((link) => (
 				<Link
 					className={cn(
@@ -45,6 +45,6 @@ export default function DashboardLinks() {
 					<span className="font-medium">{link.name}</span>
 				</Link>
 			))}
-		</>
+		</div>
 	);
 }

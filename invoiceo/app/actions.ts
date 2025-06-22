@@ -33,10 +33,7 @@ export async function onboardUser(previousState: unknown, formData: FormData) {
 	return redirect('/dashboard');
 }
 
-export async function createInvoice(
-	previousState: unknown,
-	formData: FormData,
-) {
+export async function createInvoice(prevState: any, formData: FormData) {
 	const session = await requireUser();
 
 	const submission = parseWithZod(formData, {
@@ -49,69 +46,82 @@ export async function createInvoice(
 
 	const data = await prisma.invoice.create({
 		data: {
-			clientAddress: submission.value.clientAddress,
-			clientEmail: submission.value.clientEmail,
-			clientName: submission.value.clientName,
-			currency: submission.value.currency,
+			invoiceNumber: submission.value.invoiceNumber,
+			invoiceName: submission.value.invoiceName,
+			total: submission.value.total,
+			status: 'PENDING',
 			date: submission.value.date,
 			dueDate: submission.value.dueDate,
-			fromAddress: submission.value.fromAddress,
-			fromEmail: submission.value.fromEmail,
 			fromName: submission.value.fromName,
-			invoiceName: submission.value.invoiceName,
+			fromEmail: submission.value.fromEmail,
+			fromAddress: submission.value.fromAddress,
+			clientName: submission.value.clientName,
+			clientEmail: submission.value.clientEmail,
+			clientAddress: submission.value.clientAddress,
+			currency: submission.value.currency,
 			invoiceItemDescription: submission.value.invoiceItemDescription,
 			invoiceItemQuantity: submission.value.invoiceItemQuantity,
 			invoiceItemRate: submission.value.invoiceItemRate,
-			invoiceNumber: submission.value.invoiceNumber,
 			note: submission.value.note,
-			status: submission.value.status,
-			total: submission.value.total,
-			// TODO: Temporarily commented out until Prisma client is regenerated
-			// taxRate: submission.value.taxRate || 0,
-			// taxAmount: submission.value.taxAmount || 0,
-			// subtotal: submission.value.subtotal || 0,
+			// Commented out temporarily due to Prisma client regeneration issues
+			// taxRate: submission.value.taxRate ?? 0,
+			// taxAmount: submission.value.taxAmount ?? 0,
+			// subtotal: submission.value.subtotal ?? submission.value.total,
 			userId: session.user?.id,
 		},
 	});
 
-	// Fetch current user data for dynamic sender information
-	const userData = await prisma.user.findUnique({
-		where: {
-			id: session.user?.id,
-		},
-		select: {
-			firstName: true,
-			lastName: true,
-			email: true,
-		},
-	});
-
-	// Create dynamic sender information
-	const userFullName =
-		userData?.firstName && userData?.lastName
-			? `${userData.firstName} ${userData.lastName}`
-			: userData?.firstName || userData?.lastName || 'User';
-
+	// Send email immediately
 	const sender = {
-		email: 'contact@kacpermargol.eu', // Keep verified sender email for Mailtrap
-		name: userFullName, // Use dynamic user name
+		email: 'hello@demomailtrap.com',
+		name: 'Jan Kowalski',
 	};
 
 	emailClient.send({
 		from: sender,
-		to: [{ email: submission.value.clientEmail }],
-		template_uuid: '8d4037e8-70a2-49e7-bc31-6426b29d9384',
+		to: [{ email: 'jan@acompany.com' }],
+		template_uuid: 'c9c5e343-9a14-4e8b-a3ab-77b9f4ebe35d',
 		template_variables: {
-			clientName: submission.value.clientName,
-			invoiceNumber: submission.value.invoiceNumber,
-			dueDate: new Intl.DateTimeFormat('en-GB', {
-				dateStyle: 'long',
-			}).format(new Date(submission.value.date)),
-			totalAmount: formatCurrency({
+			first_name: submission.value.clientName,
+			company_info_name: submission.value.fromName,
+			company_info_address: submission.value.fromAddress,
+			company_info_city: 'Berlin',
+			company_info_zip_code: '10115',
+			company_info_country: 'Germany',
+			invoice_number: submission.value.invoiceNumber,
+			invoice_date: new Date(submission.value.date).toLocaleDateString(
+				'en-US',
+				{
+					year: 'numeric',
+					month: 'long',
+					day: 'numeric',
+				},
+			),
+			invoice_due_date: new Intl.DateTimeFormat('en-US', {
+				year: 'numeric',
+				month: 'long',
+				day: 'numeric',
+			}).format(
+				new Date(
+					Date.now() + submission.value.dueDate * 24 * 60 * 60 * 1000,
+				),
+			),
+			invoice_total: formatCurrency({
 				amount: submission.value.total,
-				currency: submission.value.currency as 'NOK' | 'USD' | 'EUR',
+				currency: submission.value.currency as any,
 			}),
-			invoiceLink: `${process.env.NEXT_PUBLIC_APP_URL}api/invoice/${data.id}`,
+			client_name: submission.value.clientName,
+			client_address: submission.value.clientAddress,
+			client_city: 'Berlin',
+			client_zip_code: '10115',
+			client_country: 'Germany',
+			invoice_item_description: submission.value.invoiceItemDescription,
+			invoice_item_quantity: submission.value.invoiceItemQuantity,
+			invoice_item_rate: formatCurrency({
+				amount: submission.value.invoiceItemRate,
+				currency: submission.value.currency as any,
+			}),
+			invoice_note: submission.value.note ?? '',
 		},
 	});
 
@@ -135,80 +145,36 @@ export async function editInvoice(previousState: unknown, formData: FormData) {
 			userId: session.user?.id,
 		},
 		data: {
-			clientAddress: submission.value.clientAddress,
-			clientEmail: submission.value.clientEmail,
-			clientName: submission.value.clientName,
-			currency: submission.value.currency,
+			invoiceNumber: submission.value.invoiceNumber,
+			invoiceName: submission.value.invoiceName,
+			total: submission.value.total,
+			status: submission.value.status,
 			date: submission.value.date,
 			dueDate: submission.value.dueDate,
-			fromAddress: submission.value.fromAddress,
-			fromEmail: submission.value.fromEmail,
 			fromName: submission.value.fromName,
-			invoiceName: submission.value.invoiceName,
+			fromEmail: submission.value.fromEmail,
+			fromAddress: submission.value.fromAddress,
+			clientName: submission.value.clientName,
+			clientEmail: submission.value.clientEmail,
+			clientAddress: submission.value.clientAddress,
+			currency: submission.value.currency,
 			invoiceItemDescription: submission.value.invoiceItemDescription,
 			invoiceItemQuantity: submission.value.invoiceItemQuantity,
 			invoiceItemRate: submission.value.invoiceItemRate,
-			invoiceNumber: submission.value.invoiceNumber,
 			note: submission.value.note,
-			status: submission.value.status,
-			total: submission.value.total,
 		},
 	});
 
-	// Fetch current user data for dynamic sender information
-	const userData = await prisma.user.findUnique({
-		where: {
-			id: session.user?.id,
-		},
-		select: {
-			firstName: true,
-			lastName: true,
-			email: true,
-		},
-	});
-
-	// Create dynamic sender information
-	const userFullName =
-		userData?.firstName && userData?.lastName
-			? `${userData.firstName} ${userData.lastName}`
-			: userData?.firstName || userData?.lastName || 'User';
-
-	const sender = {
-		email: 'contact@kacpermargol.eu', // Keep verified sender email for Mailtrap
-		name: userFullName, // Use dynamic user name
-	};
-
-	emailClient.send({
-		from: sender,
-		to: [{ email: submission.value.clientEmail }],
-		template_uuid: '69955f27-be86-45f4-b001-72d279169ff6',
-		template_variables: {
-			clientName: submission.value.clientName,
-			invoiceNumber: submission.value.invoiceNumber,
-			dueDate: new Intl.DateTimeFormat('en-GB', {
-				dateStyle: 'long',
-			}).format(new Date(submission.value.date)),
-			totalAmount: formatCurrency({
-				amount: submission.value.total,
-				currency: submission.value.currency as 'NOK' | 'USD' | 'EUR',
-			}),
-			invoiceLink:
-				process.env.NODE_ENV !== 'production'
-					? `${process.env.NEXT_PUBLIC_APP_URL}api/invoice/${data.id}`
-					: `https://invoiceo-xi.vercel.app/api/invoice/${data.id}`,
-		},
-	});
-
-	return redirect(`/dashboard/invoices`);
+	return redirect('/dashboard/invoices');
 }
 
 export async function deleteInvoice(invoiceId: string) {
 	const session = await requireUser();
 
-	await prisma.invoice.delete({
+	const data = await prisma.invoice.delete({
 		where: {
-			userId: session.user?.id,
 			id: invoiceId,
+			userId: session.user?.id,
 		},
 	});
 
@@ -218,10 +184,10 @@ export async function deleteInvoice(invoiceId: string) {
 export async function markAsPaidAction(invoiceId: string) {
 	const session = await requireUser();
 
-	await prisma.invoice.update({
+	const data = await prisma.invoice.update({
 		where: {
-			userId: session.user?.id,
 			id: invoiceId,
+			userId: session.user?.id,
 		},
 		data: {
 			status: 'PAID',
@@ -229,4 +195,23 @@ export async function markAsPaidAction(invoiceId: string) {
 	});
 
 	return redirect('/dashboard/invoices');
+}
+
+// New function to get the next available invoice number
+export async function getNextInvoiceNumber(): Promise<number> {
+	const session = await requireUser();
+
+	const lastInvoice = await prisma.invoice.findFirst({
+		where: {
+			userId: session.user?.id,
+		},
+		orderBy: {
+			invoiceNumber: 'desc',
+		},
+		select: {
+			invoiceNumber: true,
+		},
+	});
+
+	return (lastInvoice?.invoiceNumber ?? 0) + 1;
 }

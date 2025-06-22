@@ -39,29 +39,6 @@ export async function InvoiceList() {
 	const session = await requireUser();
 	const data = await getData(session.user?.id as string);
 
-	const getStatusBadge = (status: string) => {
-		switch (status) {
-			case 'PAID':
-				return (
-					<Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0 shadow-md">
-						✅ {status}
-					</Badge>
-				);
-			case 'PENDING':
-				return (
-					<Badge className="bg-gradient-to-r from-amber-500 to-orange-500 text-white border-0 shadow-md">
-						⏳ {status}
-					</Badge>
-				);
-			default:
-				return (
-					<Badge className="bg-gradient-to-r from-gray-500 to-slate-500 text-white border-0 shadow-md">
-						{status}
-					</Badge>
-				);
-		}
-	};
-
 	return (
 		<>
 			{data.length === 0 ? (
@@ -96,7 +73,6 @@ export async function InvoiceList() {
 								</TableHead>
 							</TableRow>
 						</TableHeader>
-
 						<TableBody>
 							{data.map((invoice, index) => (
 								<TableRow
@@ -123,7 +99,23 @@ export async function InvoiceList() {
 										})}
 									</TableCell>
 									<TableCell>
-										{getStatusBadge(invoice.status)}
+										<Badge
+											variant={
+												invoice.status === 'PAID'
+													? 'default'
+													: 'secondary'
+											}
+											className={`
+												font-medium shadow-sm
+												${
+													invoice.status === 'PAID'
+														? 'bg-gradient-to-r from-success to-success/80 text-white hover:from-success/90 hover:to-success/70'
+														: 'bg-gradient-to-r from-warning to-warning/80 text-white hover:from-warning/90 hover:to-warning/70'
+												}
+											`}
+										>
+											{invoice.status}
+										</Badge>
 									</TableCell>
 									<TableCell className="text-muted-foreground">
 										{new Intl.DateTimeFormat('en-GB', {

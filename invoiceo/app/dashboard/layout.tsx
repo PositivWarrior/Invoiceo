@@ -56,8 +56,8 @@ export default async function DashboardLayout({
 		<>
 			<div className="grid min-h-screen w-full md:grid-cols-[220px_1fr] lg:grid-cols-[280px_1fr] bg-gradient-to-br from-background via-background to-accent/5">
 				<div className="hidden border-r border-primary/20 bg-gradient-to-b from-primary/5 to-accent/10 backdrop-blur-sm md:block shadow-lg">
-					<div className="flex flex-col max-h-screen h-full gap-2">
-						<div className="h-14 flex items-center border-b border-primary/20 px-4 lg:h-[60px] lg:px-6 bg-gradient-to-r from-primary/10 to-accent/10">
+					<div className="flex flex-col max-h-screen h-full">
+						<div className="h-14 flex items-center border-b border-primary/20 px-4 lg:h-[60px] lg:px-6 bg-gradient-to-r from-primary/10 to-accent/10 mb-6">
 							<Link
 								href="/"
 								className="flex items-center gap-2 hover:scale-105 transition-transform duration-200"
@@ -70,8 +70,8 @@ export default async function DashboardLayout({
 							</Link>
 						</div>
 
-						<div className="flex-1 p-2">
-							<nav className="grid items-start px-2 text-sm font-medium lg:px-4">
+						<div className="flex-1 px-4 lg:px-6">
+							<nav className="grid items-start text-sm font-medium">
 								<DashboardLinks />
 							</nav>
 						</div>
@@ -98,7 +98,14 @@ export default async function DashboardLayout({
 								<SheetTitle className="hidden">
 									Navigation
 								</SheetTitle>
-								<nav className="grid gap-2 mt-10">
+								<div className="mt-8 mb-6">
+									<Image
+										src={Logo}
+										alt="Logo"
+										className="size-32 mx-auto drop-shadow-lg"
+									/>
+								</div>
+								<nav className="grid gap-2">
 									<DashboardLinks />
 								</nav>
 							</SheetContent>
