@@ -44,7 +44,7 @@ export async function createInvoice(prevState: any, formData: FormData) {
 		return submission.reply();
 	}
 
-	const data = await prisma.invoice.create({
+	await prisma.invoice.create({
 		data: {
 			invoiceNumber: submission.value.invoiceNumber,
 			invoiceName: submission.value.invoiceName,
@@ -108,7 +108,7 @@ export async function createInvoice(prevState: any, formData: FormData) {
 			),
 			invoice_total: formatCurrency({
 				amount: submission.value.total,
-				currency: submission.value.currency as any,
+				currency: submission.value.currency as 'NOK' | 'USD' | 'EUR',
 			}),
 			client_name: submission.value.clientName,
 			client_address: submission.value.clientAddress,
@@ -119,7 +119,7 @@ export async function createInvoice(prevState: any, formData: FormData) {
 			invoice_item_quantity: submission.value.invoiceItemQuantity,
 			invoice_item_rate: formatCurrency({
 				amount: submission.value.invoiceItemRate,
-				currency: submission.value.currency as any,
+				currency: submission.value.currency as 'NOK' | 'USD' | 'EUR',
 			}),
 			invoice_note: submission.value.note ?? '',
 		},
@@ -139,7 +139,7 @@ export async function editInvoice(previousState: unknown, formData: FormData) {
 		return submission.reply();
 	}
 
-	const data = await prisma.invoice.update({
+	await prisma.invoice.update({
 		where: {
 			id: formData.get('id') as string,
 			userId: session.user?.id,
@@ -171,7 +171,7 @@ export async function editInvoice(previousState: unknown, formData: FormData) {
 export async function deleteInvoice(invoiceId: string) {
 	const session = await requireUser();
 
-	const data = await prisma.invoice.delete({
+	await prisma.invoice.delete({
 		where: {
 			id: invoiceId,
 			userId: session.user?.id,
@@ -184,7 +184,7 @@ export async function deleteInvoice(invoiceId: string) {
 export async function markAsPaidAction(invoiceId: string) {
 	const session = await requireUser();
 
-	const data = await prisma.invoice.update({
+	await prisma.invoice.update({
 		where: {
 			id: invoiceId,
 			userId: session.user?.id,

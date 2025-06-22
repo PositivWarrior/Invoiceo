@@ -123,10 +123,7 @@ export async function InvoiceList() {
 										}).format(new Date(invoice.createdAt))}
 									</TableCell>
 									<TableCell className="text-right">
-										<InvoiceActions
-											id={invoice.id}
-											status={invoice.status}
-										/>
+										<InvoiceActions id={invoice.id} />
 									</TableCell>
 								</TableRow>
 							))}

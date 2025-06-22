@@ -19,10 +19,9 @@ import Link from 'next/link';
 
 interface InvoiceActionsProps {
 	id: string;
-	status: string;
 }
 
-export function InvoiceActions({ id, status }: InvoiceActionsProps) {
+export function InvoiceActions({ id }: InvoiceActionsProps) {
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>
