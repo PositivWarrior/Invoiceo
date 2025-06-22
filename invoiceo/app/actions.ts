@@ -33,7 +33,7 @@ export async function onboardUser(previousState: unknown, formData: FormData) {
 	return redirect('/dashboard');
 }
 
-export async function createInvoice(prevState: any, formData: FormData) {
+export async function createInvoice(prevState: unknown, formData: FormData) {
 	const session = await requireUser();
 
 	const submission = parseWithZod(formData, {
