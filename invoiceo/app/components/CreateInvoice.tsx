@@ -120,9 +120,9 @@ export function CreateInvoice({
 						<span className="text-sm text-muted-foreground">
 							Invoice #{nextInvoiceNumber}
 						</span>
-						{state?.errors?.invoiceName && (
+						{state?.error?.invoiceName && (
 							<p className="text-red-500 text-sm">
-								{state.errors.invoiceName}
+								{state.error.invoiceName}
 							</p>
 						)}
 					</div>
@@ -163,9 +163,9 @@ export function CreateInvoice({
 									<SelectItem value="USD">🇺🇸 USD</SelectItem>
 								</SelectContent>
 							</Select>
-							{state?.errors?.currency && (
+							{state?.error?.currency && (
 								<p className="text-red-500 text-sm">
-									{state.errors.currency}
+									{state.error.currency}
 								</p>
 							)}
 						</div>
@@ -206,9 +206,9 @@ export function CreateInvoice({
 									defaultValue={`${firstName} ${lastName}`}
 									className="border-primary/20 focus:border-primary"
 								/>
-								{state?.errors?.fromName && (
+								{state?.error?.fromName && (
 									<p className="text-red-500 text-sm">
-										{state.errors.fromName}
+										{state.error.fromName}
 									</p>
 								)}
 								<Input
@@ -217,9 +217,9 @@ export function CreateInvoice({
 									defaultValue={email}
 									className="border-primary/20 focus:border-primary"
 								/>
-								{state?.errors?.fromEmail && (
+								{state?.error?.fromEmail && (
 									<p className="text-red-500 text-sm">
-										{state.errors.fromEmail}
+										{state.error.fromEmail}
 									</p>
 								)}
 								<Input
@@ -228,9 +228,9 @@ export function CreateInvoice({
 									defaultValue={address}
 									className="border-primary/20 focus:border-primary"
 								/>
-								{state?.errors?.fromAddress && (
+								{state?.error?.fromAddress && (
 									<p className="text-red-500 text-sm">
-										{state.errors.fromAddress}
+										{state.error.fromAddress}
 									</p>
 								)}
 							</div>
@@ -246,9 +246,9 @@ export function CreateInvoice({
 									name="clientName"
 									className="border-primary/20 focus:border-primary"
 								/>
-								{state?.errors?.clientName && (
+								{state?.error?.clientName && (
 									<p className="text-red-500 text-sm">
-										{state.errors.clientName}
+										{state.error.clientName}
 									</p>
 								)}
 								<Input
@@ -256,9 +256,9 @@ export function CreateInvoice({
 									name="clientEmail"
 									className="border-primary/20 focus:border-primary"
 								/>
-								{state?.errors?.clientEmail && (
+								{state?.error?.clientEmail && (
 									<p className="text-red-500 text-sm">
-										{state.errors.clientEmail}
+										{state.error.clientEmail}
 									</p>
 								)}
 								<Input
@@ -266,9 +266,9 @@ export function CreateInvoice({
 									name="clientAddress"
 									className="border-primary/20 focus:border-primary"
 								/>
-								{state?.errors?.clientAddress && (
+								{state?.error?.clientAddress && (
 									<p className="text-red-500 text-sm">
-										{state.errors.clientAddress}
+										{state.error.clientAddress}
 									</p>
 								)}
 							</div>
@@ -327,9 +327,9 @@ export function CreateInvoice({
 									</SelectItem>
 								</SelectContent>
 							</Select>
-							{state?.errors?.dueDate && (
+							{state?.error?.dueDate && (
 								<p className="text-red-500 text-sm">
-									{state.errors.dueDate}
+									{state.error.dueDate}
 								</p>
 							)}
 						</div>
@@ -350,9 +350,9 @@ export function CreateInvoice({
 									name="invoiceItemDescription"
 									className="border-primary/20 focus:border-primary"
 								/>
-								{state?.errors?.invoiceItemDescription && (
+								{state?.error?.invoiceItemDescription && (
 									<p className="text-red-500 text-sm mt-1">
-										{state.errors.invoiceItemDescription}
+										{state.error.invoiceItemDescription}
 									</p>
 								)}
 							</div>
@@ -367,9 +367,9 @@ export function CreateInvoice({
 									}
 									className="border-primary/20 focus:border-primary"
 								/>
-								{state?.errors?.invoiceItemQuantity && (
+								{state?.error?.invoiceItemQuantity && (
 									<p className="text-red-500 text-sm mt-1">
-										{state.errors.invoiceItemQuantity}
+										{state.error.invoiceItemQuantity}
 									</p>
 								)}
 							</div>
@@ -382,9 +382,9 @@ export function CreateInvoice({
 									onChange={(e) => setRate(e.target.value)}
 									className="border-primary/20 focus:border-primary"
 								/>
-								{state?.errors?.invoiceItemRate && (
+								{state?.error?.invoiceItemRate && (
 									<p className="text-red-500 text-sm mt-1">
-										{state.errors.invoiceItemRate}
+										{state.error.invoiceItemRate}
 									</p>
 								)}
 							</div>
@@ -461,9 +461,9 @@ export function CreateInvoice({
 							name="note"
 							className="border-primary/20 focus:border-primary"
 						/>
-						{state?.errors?.note && (
+						{state?.error?.note && (
 							<p className="text-red-500 text-sm">
-								{state.errors.note}
+								{state.error.note}
 							</p>
 						)}
 					</div>
