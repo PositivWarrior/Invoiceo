@@ -16,12 +16,34 @@ import {
 	Trash,
 } from 'lucide-react';
 import Link from 'next/link';
+import { toast } from 'sonner';
 
 interface InvoiceActionsProps {
 	id: string;
 }
 
 export function InvoiceActions({ id }: InvoiceActionsProps) {
+	const handleSendReminder = async () => {
+		try {
+			const response = await fetch(`/api/email/${id}`, {
+				method: 'POST',
+			});
+			const result = await response.json();
+
+			if (!response.ok) {
+				throw new Error(result.error || 'Failed to send reminder');
+			}
+
+			toast.success('Reminder email sent successfully!');
+		} catch (error) {
+			const errorMessage =
+				error instanceof Error
+					? error.message
+					: 'An unknown error occurred';
+			toast.error(`Failed to send reminder: ${errorMessage}`);
+		}
+	};
+
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>
@@ -53,14 +75,12 @@ export function InvoiceActions({ id }: InvoiceActionsProps) {
 						Download Invoice
 					</Link>
 				</DropdownMenuItem>
-				<DropdownMenuItem asChild>
-					<Link
-						href={`/api/email/${id}`}
-						className="hover:bg-gradient-to-r hover:from-info/5 hover:to-info/10"
-					>
-						<Mail className="size-4 mr-2 text-info" />
-						Reminder Email
-					</Link>
+				<DropdownMenuItem
+					onSelect={handleSendReminder}
+					className="cursor-pointer hover:bg-gradient-to-r hover:from-info/5 hover:to-info/10"
+				>
+					<Mail className="size-4 mr-2 text-info" />
+					Reminder Email
 				</DropdownMenuItem>
 				<DropdownMenuItem asChild>
 					<Link

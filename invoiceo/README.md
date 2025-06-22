@@ -27,6 +27,15 @@
 
 ---
 
+## 🚀 Project Updates
+
+-   **UI Refinements (June 2024)**:
+    -   Enhanced the navigation bar for a sleeker, more modern look.
+    -   Improved responsiveness of the hero section for a better user experience on all devices.
+    -   Adjusted component spacing and layout for a cleaner and more professional appearance.
+
+---
+
 ## 🛠️ Tech Stack
 
 -   **Framework**: [Next.js](httpss://nextjs.org/) (App Router)
