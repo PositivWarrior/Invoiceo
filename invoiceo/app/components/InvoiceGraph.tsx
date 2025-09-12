@@ -14,24 +14,24 @@ async function getInvoices(userId: string) {
 		where: {
 			status: 'PAID',
 			userId: userId,
-			createdAt: {
+			updatedAt: {
 				lte: new Date(),
 				gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
 			},
 		},
 		select: {
-			createdAt: true,
+			updatedAt: true,
 			total: true,
 		},
 		orderBy: {
-			createdAt: 'asc',
+			updatedAt: 'asc',
 		},
 	});
 
 	// Group and aggregate the data by date
 	const aggregatedData = rawData.reduce(
 		(acc: { [key: string]: number }, curr) => {
-			const date = new Date(curr.createdAt).toLocaleDateString('en-GB', {
+			const date = new Date(curr.updatedAt).toLocaleDateString('en-GB', {
 				month: 'short',
 				day: 'numeric',
 			});

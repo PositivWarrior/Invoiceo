@@ -5,7 +5,7 @@ import {
 	ChartTooltip,
 	ChartTooltipContent,
 } from '@/components/ui/chart';
-import { Line, LineChart, XAxis, YAxis } from 'recharts';
+import { Line, LineChart, XAxis, YAxis, ResponsiveContainer } from 'recharts';
 
 interface GraphProps {
 	data: {
@@ -15,6 +15,15 @@ interface GraphProps {
 }
 
 export function Graph({ data }: GraphProps) {
+	// If no data, show a message
+	if (!data || data.length === 0) {
+		return (
+			<div className="min-h-[300px] flex items-center justify-center text-muted-foreground">
+				No paid invoices in the last 30 days
+			</div>
+		);
+	}
+
 	return (
 		<ChartContainer
 			config={{
@@ -26,8 +35,18 @@ export function Graph({ data }: GraphProps) {
 			className="min-h-[300px]"
 		>
 			<LineChart data={data}>
-				<XAxis dataKey="date" />
-				<YAxis />
+				<XAxis
+					dataKey="date"
+					fontSize={12}
+					tickLine={false}
+					axisLine={false}
+				/>
+				<YAxis
+					fontSize={12}
+					tickLine={false}
+					axisLine={false}
+					tickFormatter={(value) => `$${value}`}
+				/>
 				<ChartTooltip
 					content={<ChartTooltipContent indicator="line" />}
 				/>
@@ -36,6 +55,12 @@ export function Graph({ data }: GraphProps) {
 					type="monotone"
 					stroke="var(--color-amount)"
 					strokeWidth={2}
+					dot={{ fill: 'var(--color-amount)', strokeWidth: 2, r: 4 }}
+					activeDot={{
+						r: 6,
+						stroke: 'var(--color-amount)',
+						strokeWidth: 2,
+					}}
 				/>
 			</LineChart>
 		</ChartContainer>
